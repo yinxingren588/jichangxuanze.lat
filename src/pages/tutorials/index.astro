@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { TUTORIALS_DATA } from '../../data/tutorials';
+---
+
+<BaseLayout
+  title="客户端配置教程与新手手册 - Clash / 小火箭 / Sing-box | 机场选择"
+  description="全平台科学上网客户端保姆级图文教程。涵盖 Windows / Mac / iOS / Android 平台主流代理软件订阅导入、规则配置与故障排查。"
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="max-w-3xl mb-12">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/60 text-xs text-cyan-300 font-medium mb-3">
+        <span>📚 保姆级新手手册</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+        客户端配置教程与常见排错
+      </h1>
+      <p class="text-slate-400 text-sm mt-3 leading-relaxed">
+        买了机场节点不知道怎么用？本专区整理了全平台（Windows / macOS / iOS / Android）目前最稳定主流的科学上网软件图文使用指南，助你 3 分钟极速上手。
+      </p>
+    </div>
+
+    <!-- Tutorials Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {TUTORIALS_DATA.map((tut) => (
+        <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 transition-all flex flex-col justify-between group">
+          <div>
+            <div class="flex items-center justify-between text-xs text-slate-500 mb-3">
+              <span class="px-2.5 py-0.5 rounded-full bg-cyan-950 text-cyan-300 font-medium border border-cyan-800/60">
+                {tut.platform}
+              </span>
+              <span>{tut.readTime}</span>
+            </div>
+
+            <h2 class="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">
+              <a href={`/tutorials/${tut.slug}`}>
+                {tut.title}
+              </a>
+            </h2>
+
+            <p class="text-xs sm:text-sm text-slate-400 mt-3 leading-relaxed">
+              {tut.description}
+            </p>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-800/60 flex items-center justify-between">
+            <span class="text-xs text-slate-500">更新时间：{tut.date}</span>
+            <a
+              href={`/tutorials/${tut.slug}`}
+              class="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+            >
+              <span>阅读图文教程</span>
+              <span>→</span>
+            </a>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

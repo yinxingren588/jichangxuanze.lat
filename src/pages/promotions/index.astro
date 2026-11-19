@@ -1,0 +1,92 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { AIRPORTS_DATA } from '../../data/airports';
+
+const promoList = AIRPORTS_DATA.filter((a) => a.coupon);
+---
+
+<BaseLayout
+  title="2025/2026 机场优惠码大全 - 最新折扣码与特惠汇总 | 机场选择"
+  description="全网最新稳定机场优惠码与折扣活动汇总。包含年付8折优惠码、新用户首单减免与双十一/黑五节日促销代码，每日实时验证可用性。"
+>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="max-w-3xl mb-12">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-950/80 border border-rose-800/60 text-xs text-rose-300 font-medium mb-3">
+        <span>🎁 每日验证 · 实时省钱</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+        最新机场优惠码与折扣大汇总
+      </h1>
+      <p class="text-slate-400 text-sm mt-3 leading-relaxed">
+        本页面汇集各大精选机场的官方最新有效折扣码。下单结账时在“优惠券/折扣码”输入框内粘贴即可立减。
+      </p>
+    </div>
+
+    <!-- Coupons Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {promoList.map((item) => (
+        <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 hover:border-cyan-500/40 transition-all flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800/60">
+                {item.categoryLabel}
+              </span>
+              <span class="text-xs font-bold text-rose-400 bg-rose-950/60 px-2.5 py-0.5 rounded-full border border-rose-800/60">
+                {item.coupon?.discount}
+              </span>
+            </div>
+
+            <h2 class="text-lg font-bold text-white">
+              {item.name}
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">
+              {item.slogan}
+            </p>
+
+            <div class="mt-4 p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-slate-500 uppercase block tracking-wider">专属优惠码</span>
+                <span class="text-lg font-mono font-bold text-cyan-400 tracking-wider">
+                  {item.coupon?.code}
+                </span>
+              </div>
+              <button
+                type="button"
+                data-copy-code={item.coupon?.code}
+                class="px-3 py-1.5 rounded-lg text-xs font-medium bg-cyan-600 hover:bg-cyan-500 text-white transition-all cursor-pointer"
+              >
+                一键复制
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-800/60 flex items-center justify-between">
+            <span class="text-xs text-slate-500">起步仅 ¥{item.priceStart} /{item.billingCycle}</span>
+            <a
+              href={item.affUrl}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-cyan-600 text-slate-200 hover:text-white transition-all flex items-center gap-1"
+            >
+              <span>直达官网兑换</span>
+              <span>↗</span>
+            </a>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Coupon Usage FAQ -->
+    <div class="mt-16 p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
+      <h3 class="text-base font-bold text-white">❓ 如何使用优惠码？</h3>
+      <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+        1. 点击上方「一键复制」按钮复制对应的优惠代码；<br />
+        2. 点击「直达官网兑换」进入机场官方网站并注册/登录账号；<br />
+        3. 进入“购买订阅”选择您心仪的套餐周期（通常年付支持叠加更高折扣）；<br />
+        4. 在结账结算页面找到“验证优惠码”或“有优惠券？”输入框，粘贴代码并点击验证，系统将自动扣减金额。
+      </p>
+    </div>
+
+  </div>
+</BaseLayout>

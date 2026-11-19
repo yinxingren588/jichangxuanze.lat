@@ -1,0 +1,231 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { FAQS_DATA, type FAQItem } from '../../data/faqs';
+import { AIRPORTS_DATA } from '../../data/airports';
+
+export function getStaticPaths() {
+  return FAQS_DATA.map((faq) => ({
+    params: { slug: faq.slug },
+    props: { faq },
+  }));
+}
+
+interface Props {
+  faq: FAQItem;
+}
+
+const { faq } = Astro.props;
+
+// Pick top 2 recommended airports for CTA
+const featuredAirports = AIRPORTS_DATA.slice(0, 2);
+
+// Find related FAQs in the same category
+const relatedList = FAQS_DATA.filter(
+  (f) => f.category === faq.category && f.slug !== faq.slug
+).slice(0, 4);
+
+// Google FAQPage Schema
+const faqSchema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: faq.title,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: `${faq.summary} 解决步骤：${faq.solutions.map((s, i) => `${i + 1}. ${s.stepTitle}：${s.detail}`).join(' ')} 老鸟建议：${faq.faqTips}`,
+      },
+    },
+  ],
+});
+---
+
+<BaseLayout
+  title={`${faq.title} - 解决方案与排错教程 | 机场选择`}
+  description={faq.summary}
+  schemaJson={faqSchema}
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-xs text-slate-500 mb-6 flex-wrap">
+      <a href="/" class="hover:text-slate-300">首页</a>
+      <span>/</span>
+      <a href="/faq/" class="hover:text-slate-300">FAQ 排错中心</a>
+      <span>/</span>
+      <span class="text-slate-400">{faq.categoryLabel}</span>
+      <span>/</span>
+      <span class="text-cyan-400 font-medium truncate max-w-[200px] sm:max-w-none">{faq.title}</span>
+    </nav>
+
+    <!-- Header Block -->
+    <header class="mb-10 pb-8 border-b border-slate-800">
+      <div class="flex items-center gap-2 text-xs text-slate-400 mb-3 flex-wrap">
+        <span class="px-2.5 py-0.5 rounded-full bg-cyan-950 text-cyan-300 font-medium border border-cyan-800">
+          {faq.categoryLabel}
+        </span>
+        <span>•</span>
+        <span>预计阅读：{faq.readTime}</span>
+        <span>•</span>
+        <span>{faq.updatedAt}</span>
+      </div>
+
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+        {faq.title}
+      </h1>
+
+      <p class="text-sm sm:text-base text-slate-300 mt-4 leading-relaxed p-4 rounded-xl bg-slate-900/60 border border-slate-800/80">
+        📌 <strong>核心概要：</strong>{faq.summary}
+      </p>
+
+      <!-- TOC Quick Jump -->
+      <div class="flex items-center gap-2 text-xs text-slate-400 mt-4 overflow-x-auto pb-1">
+        <span class="text-slate-500 shrink-0 font-medium">快速直达：</span>
+        <a href="#symptoms" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-rose-300 border border-slate-700/60 shrink-0 transition-colors">⚠️ 故障表现</a>
+        <a href="#causes" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700/60 shrink-0 transition-colors">🔍 深度根因</a>
+        <a href="#solutions" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700/60 shrink-0 transition-colors">🛠️ 解决步骤</a>
+        <a href="#tips" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700/60 shrink-0 transition-colors">💡 避坑建议</a>
+      </div>
+    </header>
+
+    <!-- Content Sections -->
+    <div class="space-y-10 text-sm sm:text-base text-slate-300 leading-relaxed">
+      
+      <!-- Section 1: 故障现象 (Symptoms) -->
+      <section id="symptoms" class="scroll-mt-20 p-6 rounded-2xl bg-rose-950/20 border border-rose-900/40 space-y-3">
+        <h2 class="text-base sm:text-lg font-bold text-rose-300 flex items-center gap-2">
+          <span>⚠️ 典型故障表现与报错特征</span>
+        </h2>
+        <ul class="space-y-2 text-xs sm:text-sm text-slate-300">
+          {faq.symptoms.map((sym) => (
+            <li class="flex items-start gap-2">
+              <span class="text-rose-400 font-bold shrink-0">•</span>
+              <span>{sym}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <!-- Section 2: 根本原因剖析 (Root Causes) -->
+      <section id="causes" class="scroll-mt-20 p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
+        <h2 class="text-base sm:text-lg font-bold text-cyan-300 flex items-center gap-2">
+          <span>🔍 深层技术原因剖析</span>
+        </h2>
+        <ul class="space-y-2.5 text-xs sm:text-sm text-slate-300">
+          {faq.rootCauses.map((cause) => (
+            <li class="flex items-start gap-2.5">
+              <span class="text-cyan-400 font-bold shrink-0">➜</span>
+              <span>{cause}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <!-- Section 3: 详细实操解决步骤 (Solutions) -->
+      <section id="solutions" class="scroll-mt-20 space-y-6">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span>🛠️ 分步实操解决方案</span>
+        </h2>
+
+        {faq.solutions.map((sol, idx) => (
+          <div class="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="w-7 h-7 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs flex items-center justify-center shrink-0">
+                {idx + 1}
+              </div>
+              <h3 class="text-base font-bold text-white">
+                {sol.stepTitle}
+              </h3>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              {sol.detail}
+            </p>
+            {sol.code && (
+              <div class="mt-2 p-3.5 rounded-xl bg-slate-950 border border-slate-850 font-mono text-xs text-cyan-300 overflow-x-auto">
+                <pre><code>{sol.code}</code></pre>
+              </div>
+            )}
+          </div>
+        ))}
+      </section>
+
+      <!-- Section 4: 老鸟避坑建议 (Pro Tips) -->
+      <section id="tips" class="scroll-mt-20 p-6 rounded-2xl bg-amber-950/20 border border-amber-900/40 space-y-2">
+        <h3 class="text-base font-bold text-amber-300 flex items-center gap-2">
+          <span>💡 老鸟避坑与长效建议</span>
+        </h3>
+        <p class="text-xs sm:text-sm text-amber-200/90 leading-relaxed">
+          {faq.faqTips}
+        </p>
+      </section>
+
+      <!-- High-converting CTA Banner -->
+      <section class="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-cyan-950/40 border border-cyan-800/40">
+        <div class="flex items-center gap-2 text-xs text-cyan-400 font-bold mb-2">
+          <span>🚀 告别节点频繁报错与维护断流</span>
+        </div>
+        <h3 class="text-lg sm:text-xl font-bold text-white">
+          依然无法彻底解决？可能是当前机场线路质量欠佳
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed mb-6">
+          很多连接超时与握手报错，本质上源于廉价公网中继被运营商高频干扰。建议搭配本站实测推荐的 <strong>IPLC 物理纯专线</strong>，从物理层杜绝 GFW 丢包与风控阻断：
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {featuredAirports.map((airport) => (
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-white text-sm">{airport.name}</span>
+                  <span class="text-xs text-cyan-400 font-bold">¥{airport.priceStart}起</span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1 line-clamp-1">{airport.slogan}</p>
+                {airport.coupon && (
+                  <div class="mt-2 text-[10px] text-cyan-300 font-mono">
+                    优惠码: <strong class="text-white">{airport.coupon.code}</strong>
+                  </div>
+                )}
+              </div>
+              <div class="mt-3 flex gap-2">
+                <a
+                  href={airport.affUrl}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  class="flex-1 py-1.5 px-3 rounded-lg text-center text-xs font-semibold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-colors"
+                >
+                  直达开通 ↗
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Section 5: 相关指南推荐 (Related FAQs) -->
+      {relatedList.length > 0 && (
+        <section class="pt-6 border-t border-slate-800/80">
+          <h3 class="text-base font-bold text-white mb-4">
+            📚 同分类相关排错指南
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {relatedList.map((rel) => (
+              <a
+                href={`/faq/${rel.slug}`}
+                class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/70 hover:border-cyan-500/40 hover:bg-slate-900 transition-all block group"
+              >
+                <div class="text-xs font-bold text-white group-hover:text-cyan-400 transition-colors line-clamp-1">
+                  {rel.title}
+                </div>
+                <div class="text-[11px] text-slate-400 mt-1 line-clamp-1">
+                  {rel.summary}
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+    </div>
+  </div>
+</BaseLayout>

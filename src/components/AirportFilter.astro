@@ -1,0 +1,48 @@
+---
+import { CATEGORIES } from '../data/airports';
+---
+
+<div class="flex items-center justify-center flex-wrap gap-2 mb-10" id="filter-buttons">
+  {CATEGORIES.map((cat, idx) => (
+    <button
+      type="button"
+      data-filter={cat.id}
+      class={`px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer ${
+        idx === 0
+          ? 'filter-btn-active bg-cyan-500 text-white shadow-lg shadow-cyan-500/25'
+          : 'bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800'
+      }`}
+    >
+      {cat.label}
+    </button>
+  ))}
+</div>
+
+<script>
+  const filterBtns = document.querySelectorAll('#filter-buttons button');
+  const cards = document.querySelectorAll('.airport-card');
+
+  filterBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const targetCategory = btn.getAttribute('data-filter');
+
+      // Update button active states
+      filterBtns.forEach((b) => {
+        b.classList.remove('filter-btn-active', 'bg-cyan-500', 'text-white', 'shadow-lg', 'shadow-cyan-500/25');
+        b.classList.add('bg-slate-900', 'text-slate-300', 'border', 'border-slate-800');
+      });
+      btn.classList.add('filter-btn-active', 'bg-cyan-500', 'text-white', 'shadow-lg', 'shadow-cyan-500/25');
+      btn.classList.remove('bg-slate-900', 'text-slate-300', 'border', 'border-slate-800');
+
+      // Filter cards
+      cards.forEach((card) => {
+        const cardCategory = card.getAttribute('data-category');
+        if (targetCategory === 'all' || cardCategory === targetCategory) {
+          (card as HTMLElement).style.display = '';
+        } else {
+          (card as HTMLElement).style.display = 'none';
+        }
+      });
+    });
+  });
+</script>

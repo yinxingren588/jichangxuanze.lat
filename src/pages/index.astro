@@ -1,0 +1,156 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import AirportCard from '../components/AirportCard.astro';
+import AirportFilter from '../components/AirportFilter.astro';
+import ComparisonTable from '../components/ComparisonTable.astro';
+import GuideSection from '../components/GuideSection.astro';
+import { AIRPORTS_DATA } from '../data/airports';
+import { TUTORIALS_DATA } from '../data/tutorials';
+import { FAQS_DATA } from '../data/faqs';
+
+const featuredFaqs = FAQS_DATA.slice(0, 6);
+---
+
+<BaseLayout
+  title="机场选择 - 稳定高速翻墙机场推荐与评测排行榜 (jichangxuanze.lat)"
+  description="专业的科学上网与翻墙机场横向评测博客。真实晚高峰测速、IPLC专线推荐、流媒体/ChatGPT解锁检测、Clash/Sing-box保姆级配置教程与最新优惠码汇总。"
+>
+  <!-- Hero Section -->
+  <Hero />
+
+  <!-- Main Airport Cards Section -->
+  <section id="airports-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="text-center mb-6">
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+        🔥 精选优质机场排行榜与测速推荐
+      </h2>
+      <p class="text-slate-400 text-xs sm:text-sm mt-1">
+        点击标签快速按需筛选，所有机场均通过晚高峰 4K 压测与真实解锁测试
+      </p>
+    </div>
+
+    <!-- Filter Buttons -->
+    <AirportFilter />
+
+    <!-- Airport Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+      {AIRPORTS_DATA.map((airport) => (
+        <AirportCard airport={airport} isFullRow={airport.slug === 'invisible'} />
+      ))}
+    </div>
+  </section>
+
+  <!-- Horizontal Comparison Table -->
+  <section id="comparison-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs text-cyan-400 font-medium mb-3">
+        <span>📊 一览无余</span>
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+        核心参数横向对比总表
+      </h2>
+      <p class="text-slate-400 text-xs sm:text-sm mt-1">
+        一分钟搞懂价格、协议、线路与解锁差异，选出最适合你的方案
+      </p>
+    </div>
+
+    <ComparisonTable />
+  </section>
+
+  <!-- Tutorials & Knowledge Section -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex flex-col sm:flex-row items-baseline justify-between mb-8 gap-2">
+      <div>
+        <h2 class="text-2xl font-bold text-white tracking-tight">
+          📚 新手客户端与使用教程
+        </h2>
+        <p class="text-slate-400 text-xs sm:text-sm mt-1">
+          新手入门不怕难，手把手图文指导教你一键导入节点
+        </p>
+      </div>
+      <a href="/tutorials/" class="text-xs text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1">
+        <span>查看全部教程 ({TUTORIALS_DATA.length})</span>
+        <span>→</span>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {TUTORIALS_DATA.map((tut) => (
+        <a
+          href={`/tutorials/${tut.slug}`}
+          class="group p-5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 hover:bg-slate-900 transition-all flex flex-col justify-between"
+        >
+          <div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500 mb-2">
+              <span class="px-2 py-0.5 rounded bg-slate-800 text-cyan-300 font-medium">{tut.platform}</span>
+              <span>{tut.readTime}</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-cyan-400 transition-colors line-clamp-2">
+              {tut.title}
+            </h3>
+            <p class="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+              {tut.description}
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs text-cyan-400 font-medium">
+            <span>开始阅读</span>
+            <span class="group-hover:translate-x-1 transition-transform">→</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- FAQ Knowledge Base Section -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-slate-800/80">
+    <div class="flex flex-col sm:flex-row items-baseline justify-between mb-8 gap-2">
+      <div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-cyan-950 text-cyan-300 text-xs font-semibold mb-2">
+          <span>💡 故障排查与使用指南</span>
+        </div>
+        <h2 class="text-2xl font-bold text-white tracking-tight">
+          科学上网常见疑问与排错知识库
+        </h2>
+        <p class="text-slate-400 text-xs sm:text-sm mt-1">
+          覆盖客户端报错、ChatGPT/Claude风控拦截、Netflix解锁、系统分流与防坑指南
+        </p>
+      </div>
+      <a href="/faq/" class="text-xs text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1">
+        <span>进入 FAQ 知识库</span>
+        <span>→</span>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {featuredFaqs.map((faq) => (
+        <a
+          href={`/faq/${faq.slug}`}
+          class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 hover:bg-slate-900 transition-all flex flex-col justify-between group"
+        >
+          <div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500 mb-2">
+              <span class="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 font-medium">{faq.categoryLabel}</span>
+              <span>{faq.readTime}</span>
+            </div>
+            <h3 class="text-sm font-bold text-white group-hover:text-cyan-400 transition-colors line-clamp-2">
+              {faq.title}
+            </h3>
+            <p class="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+              {faq.summary}
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs text-cyan-400 font-medium">
+            <span>阅读解决方案</span>
+            <span class="group-hover:translate-x-1 transition-transform">→</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- Buying & Anti-pitfall Guide -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <GuideSection />
+  </div>
+</BaseLayout>

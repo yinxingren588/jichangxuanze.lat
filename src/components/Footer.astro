@@ -1,0 +1,75 @@
+---
+import { SITE_METADATA } from '../data/navigation';
+---
+
+<footer class="border-t border-slate-800/80 bg-slate-950/90 text-slate-400 text-sm mt-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      
+      <!-- Brand & Mission -->
+      <div class="space-y-4 md:col-span-1">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">✈️</span>
+          <span class="text-lg font-bold text-white">机场选择</span>
+        </div>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          专注于真实晚高峰测速、专线质量评估与流媒体/AI 解锁测评。为学术查阅、外贸办公、跨境电商及海外娱乐提供客观选购指引。
+        </p>
+        <div class="text-xs text-slate-500 font-mono">
+          域名：{SITE_METADATA.domain}
+        </div>
+      </div>
+
+      <!-- Quick Nav -->
+      <div>
+        <h4 class="text-xs font-semibold text-slate-200 uppercase tracking-wider mb-3">快捷导航</h4>
+        <ul class="space-y-2 text-xs">
+          <li><a href="/" class="hover:text-cyan-400 transition-colors">🔥 首页热门推荐</a></li>
+          <li><a href="/rankings/" class="hover:text-cyan-400 transition-colors">🏆 年度机场排行榜</a></li>
+          <li><a href="/faq/" class="hover:text-cyan-400 transition-colors">💡 FAQ 排错指南</a></li>
+          <li><a href="/reviews/" class="hover:text-cyan-400 transition-colors">📝 详细测评归档</a></li>
+          <li><a href="/promotions/" class="hover:text-cyan-400 transition-colors">🎁 优惠码实时汇总</a></li>
+        </ul>
+      </div>
+
+      <!-- Tutorials & Clients -->
+      <div>
+        <h4 class="text-xs font-semibold text-slate-200 uppercase tracking-wider mb-3">客户端与工具</h4>
+        <ul class="space-y-2 text-xs">
+          <li><a href="/tutorials/clash-verge-rev-guide" class="hover:text-cyan-400 transition-colors">Clash Verge Rev 教程</a></li>
+          <li><a href="/tutorials/shadowrocket-ios-guide" class="hover:text-cyan-400 transition-colors">iOS 小火箭 (Shadowrocket) 教程</a></li>
+          <li><a href="/tutorials/sing-box-guide" class="hover:text-cyan-400 transition-colors">Sing-box 通用核心教程</a></li>
+          <li><a href="/tutorials/proxy-faq-rules" class="hover:text-cyan-400 transition-colors">常见连不上/DNS排错</a></li>
+        </ul>
+      </div>
+
+      <!-- Disclaimer & Compliance -->
+      <div>
+        <h4 class="text-xs font-semibold text-slate-200 uppercase tracking-wider mb-3">合规与免责声明</h4>
+        <p class="text-xs text-slate-500 leading-relaxed">
+          本站仅提供技术评测、性能测试数据分享及网络优化知识探讨。请严格遵守所在国家及地区法律法规，严禁将网络代理用于任何违法违规用途。
+        </p>
+        <p class="text-xs text-slate-500 leading-relaxed mt-2">
+          部分直达链接包含 Affiliate 返利合作，但这绝不影响我们评测数据的客观真实性。
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Bottom copyright -->
+    <div class="border-t border-slate-800/60 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+      <div>
+        © 2025-2026 {SITE_METADATA.shortTitle} ({SITE_METADATA.domain}) All Rights Reserved.
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="/about/" class="hover:text-slate-400">关于本站</a>
+        <span>•</span>
+        <a href="/about/" class="hover:text-slate-400">测速环境说明</a>
+        <span>•</span>
+        <a href="/about/" class="hover:text-slate-400">联系与投稿</a>
+        <span>•</span>
+        <a href="/sitemap.xml" target="_blank" class="hover:text-cyan-400 transition-colors">XML 网站地图</a>
+      </div>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,6 @@
+# Robots.txt for jichangxuanze.lat
+User-agent: *
+Allow: /
+
+# Sitemap Index
+Sitemap: https://jichangxuanze.lat/sitemap.xml

@@ -1,0 +1,86 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AirportCard from '../../components/AirportCard.astro';
+import ComparisonTable from '../../components/ComparisonTable.astro';
+import { AIRPORTS_DATA } from '../../data/airports';
+
+const iplcList = AIRPORTS_DATA.filter((a) => a.category === 'iplc');
+const budgetList = AIRPORTS_DATA.filter((a) => a.category === 'budget');
+const ondemandList = AIRPORTS_DATA.filter((a) => a.category === 'ondemand');
+---
+
+<BaseLayout
+  title="2025/2026 年度机场排行榜 - 稳定高速翻墙节点与专线推荐 | 机场选择"
+  description="根据晚高峰延迟、丢包率、流媒体解锁速度和性价比，深度评选出年度稳定机场排行榜 TOP 榜单。"
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="text-center max-w-3xl mx-auto mb-12">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/60 text-xs text-cyan-300 font-medium mb-4">
+        <span>🏆 权威年度评测榜单</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+        2025/2026 年度机场排行榜
+      </h1>
+      <p class="text-slate-400 text-sm sm:text-base mt-3 leading-relaxed">
+        我们通过持续 30 天、每晚 20:00~23:00 晚高峰多地多运营商（电信/联通/移动）实测，
+        综合考核<strong>专线质量、高峰期丢包率、流媒体/ChatGPT 解锁率与客户服务</strong>后生成的排行榜单。
+      </p>
+    </div>
+
+    <!-- Category 1: 稳定专线榜 -->
+    <div class="mb-16">
+      <div class="flex items-center gap-3 mb-6 pb-3 border-b border-slate-800">
+        <span class="text-2xl">👑</span>
+        <div>
+          <h2 class="text-xl font-bold text-white">年度旗舰专线榜（IPLC/IEPL 零断流）</h2>
+          <p class="text-xs text-slate-400 mt-0.5">适合追求极致速度、晚高峰 4K/8K 毫无压力、重度外贸与生产力用户</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {iplcList.map((airport) => (
+          <AirportCard airport={airport} isFullRow={airport.slug === 'invisible'} />
+        ))}
+      </div>
+    </div>
+
+    <!-- Category 2: 平价性价比榜 -->
+    <div class="mb-16">
+      <div class="flex items-center gap-3 mb-6 pb-3 border-b border-slate-800">
+        <span class="text-2xl">💰</span>
+        <div>
+          <h2 class="text-xl font-bold text-white">平价学生高性价比榜（月付 10-15 元）</h2>
+          <p class="text-xs text-slate-400 mt-0.5">大流量、低门槛、适合学生党日常查资料、看视频与轻度科学上网</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {budgetList.map((airport) => (
+          <AirportCard airport={airport} />
+        ))}
+      </div>
+    </div>
+
+    <!-- Category 3: 不限时按量计费榜 -->
+    <div class="mb-16">
+      <div class="flex items-center gap-3 mb-6 pb-3 border-b border-slate-800">
+        <span class="text-2xl">📦</span>
+        <div>
+          <h2 class="text-xl font-bold text-white">不限时按量计费神机榜（流量永久有效）</h2>
+          <p class="text-xs text-slate-400 mt-0.5">告别每月到期清零！适合轻度备用、偶尔查阅外网资料与外贸应急</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {ondemandList.map((airport) => (
+          <AirportCard airport={airport} />
+        ))}
+      </div>
+    </div>
+
+    <!-- Comparison Summary -->
+    <div class="mt-16">
+      <h3 class="text-lg font-bold text-white mb-4">全部入榜机场横向对比</h3>
+      <ComparisonTable />
+    </div>
+
+  </div>
+</BaseLayout>

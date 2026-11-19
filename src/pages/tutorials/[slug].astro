@@ -1,0 +1,148 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { TUTORIALS_DATA, type Tutorial } from '../../data/tutorials';
+
+export function getStaticPaths() {
+  return TUTORIALS_DATA.map((tut) => ({
+    params: { slug: tut.slug },
+    props: { tut },
+  }));
+}
+
+interface Props {
+  tut: Tutorial;
+}
+
+const { tut } = Astro.props;
+---
+
+<BaseLayout
+  title={`${tut.title} | 机场选择教程中心`}
+  description={tut.description}
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-xs text-slate-500 mb-6">
+      <a href="/" class="hover:text-slate-300">首页</a>
+      <span>/</span>
+      <a href="/tutorials/" class="hover:text-slate-300">教程中心</a>
+      <span>/</span>
+      <span class="text-cyan-400 font-medium truncate">{tut.clientName}</span>
+    </nav>
+
+    <!-- Header -->
+    <header class="mb-10 pb-8 border-b border-slate-800">
+      <div class="flex items-center gap-2 text-xs text-slate-400 mb-3">
+        <span class="px-2.5 py-0.5 rounded-full bg-cyan-950 text-cyan-300 font-medium border border-cyan-800">
+          {tut.platform}
+        </span>
+        <span>•</span>
+        <span>{tut.readTime}</span>
+        <span>•</span>
+        <span>发布日期：{tut.date}</span>
+      </div>
+
+      <h1 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+        {tut.title}
+      </h1>
+      <p class="text-sm sm:text-base text-slate-400 mt-3 leading-relaxed">
+        {tut.description}
+      </p>
+
+      {tut.downloadUrl && (
+        <div class="mt-6">
+          <a
+            href={tut.downloadUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/20 transition-all"
+          >
+            <span>📥 前往官方 GitHub 下载 {tut.clientName} 最新安装包</span>
+            <span>↗</span>
+          </a>
+        </div>
+      )}
+    </header>
+
+    <!-- Tutorial Step-by-Step Content -->
+    <article class="space-y-10 text-sm sm:text-base text-slate-300 leading-relaxed">
+      
+      <!-- Step 1 -->
+      <section class="space-y-3 p-6 rounded-2xl bg-slate-900/60 border border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-cyan-500 text-slate-950 font-bold flex items-center justify-center text-sm shrink-0">
+            1
+          </div>
+          <h2 class="text-lg font-bold text-white">下载并安装客户端</h2>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-400">
+          从正规开源渠道（如 GitHub Releases）下载与您操作系统匹配的安装包（Windows 建议下载 x64/Setup 版本，macOS 根据芯片选择 Intel 或 Apple Silicon 架构），完成安装后首次启动。
+        </p>
+      </section>
+
+      <!-- Step 2 -->
+      <section class="space-y-3 p-6 rounded-2xl bg-slate-900/60 border border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-cyan-500 text-slate-950 font-bold flex items-center justify-center text-sm shrink-0">
+            2
+          </div>
+          <h2 class="text-lg font-bold text-white">获取机场订阅链接 (Subscription URL)</h2>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-400">
+          登录您所购买的机场用户后台，在“用户中心”或“仪表盘”中找到 <strong>「一键导入」</strong> 或 <strong>「复制 Clash / 通用订阅链接」</strong>。
+        </p>
+        <div class="p-3 rounded-lg bg-slate-950 border border-slate-800 text-xs text-amber-300">
+          ⚠️ 注意：订阅链接相当于您的节点账号密码，切勿泄露给他人或公开在网上。
+        </div>
+      </section>
+
+      <!-- Step 3 -->
+      <section class="space-y-3 p-6 rounded-2xl bg-slate-900/60 border border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-cyan-500 text-slate-950 font-bold flex items-center justify-center text-sm shrink-0">
+            3
+          </div>
+          <h2 class="text-lg font-bold text-white">导入订阅并下载节点列表</h2>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-400">
+          进入客户端配置页面（Profiles / 配置），将刚才复制的订阅链接粘贴到输入框中，点击 <strong>「保存并下载 (Download)」</strong>。稍等数秒，即可看到加载完成的全部海内外节点。
+        </p>
+      </section>
+
+      <!-- Step 4 -->
+      <section class="space-y-3 p-6 rounded-2xl bg-slate-900/60 border border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-cyan-500 text-slate-950 font-bold flex items-center justify-center text-sm shrink-0">
+            4
+          </div>
+          <h2 class="text-lg font-bold text-white">选择分流模式与开启代理</h2>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-400">
+          在客户端代理页面中：
+        </p>
+        <ul class="list-disc pl-5 space-y-1 text-xs sm:text-sm text-slate-400">
+          <li><strong>推荐模式：</strong>选择 <strong>规则模式 (Rule)</strong>。该模式会自动识别海外网站走代理加速，百度、淘宝、微信等国内流量自动直连，不耗费机场流量。</li>
+          <li><strong>挑选节点：</strong>点击延迟测试（闪电图标），挑选延迟低于 60ms 的优质香港或日本专线节点。</li>
+          <li><strong>开启系统代理：</strong>在开关处勾选「系统代理 (System Proxy)」，即可畅享秒开外网。</li>
+        </ul>
+      </section>
+
+      <!-- Recommended Airports Callout -->
+      <div class="p-6 rounded-2xl bg-gradient-to-r from-slate-900 to-cyan-950/40 border border-cyan-800/40 mt-8">
+        <h3 class="text-base font-bold text-white mb-2">💡 还没有好用的节点订阅？</h3>
+        <p class="text-xs sm:text-sm text-slate-400 mb-4">
+          优质的客户端需要搭配靠谱的 IPLC 专线才能发挥全部性能。前往我们的排行榜挑选经过晚高峰实测的靠谱机场：
+        </p>
+        <a
+          href="/rankings/"
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-500 text-slate-950 hover:bg-cyan-400 transition-colors"
+        >
+          <span>查看年度稳定机场排行榜</span>
+          <span>→</span>
+        </a>
+      </div>
+
+    </article>
+  </div>
+</BaseLayout>

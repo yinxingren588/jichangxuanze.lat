@@ -1,0 +1,200 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { FAQS_DATA, FAQ_CATEGORIES } from '../../data/faqs';
+---
+
+<BaseLayout
+  title="科学上网与机场使用 FAQ 百科全书 - 常见问题与排错手册 | 机场选择"
+  description="全网最全的翻墙与机场故障排查指南。涵盖客户端配置、TLS/超时报错、ChatGPT/Claude风控绕过、Netflix/Disney+流媒体解锁、分流规则与全平台疑难杂症。"
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="text-center max-w-3xl mx-auto mb-10">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/60 text-xs text-cyan-300 font-medium mb-3">
+        <span>💡 专业深度排错手册</span>
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+        科学上网疑难排错知识库
+      </h1>
+      <p class="text-slate-400 text-sm sm:text-base mt-3 leading-relaxed">
+        拒绝泛泛而谈的废话堆砌。针对具体错误代码、底层协议与客户端特性深度编写，助你快速解决任何网络疑难。
+      </p>
+
+      <!-- Instant Search Box -->
+      <div class="mt-8 max-w-xl mx-auto relative">
+        <div class="relative">
+          <input
+            type="text"
+            id="faq-search"
+            placeholder="🔍 搜索故障关键词 (如：TUN模式、10000ms、ChatGPT 1020、Netflix、DNS泄漏)..."
+            class="w-full px-5 py-3.5 pl-12 rounded-2xl bg-slate-900 border border-slate-700/80 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 shadow-xl transition-all"
+          />
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-base">
+            ⚡
+          </span>
+        </div>
+        <div class="text-right text-[11px] text-slate-500 mt-2" id="search-counter">
+          已汇总覆盖常见疑难杂症与实操方案
+        </div>
+
+        <!-- Quick Hot Tags -->
+        <div class="flex items-center justify-center gap-1.5 flex-wrap text-xs text-slate-400 mt-3" id="quick-tags">
+          <span class="text-slate-500 text-[11px]">🔥 热搜高频：</span>
+          {['TUN模式', '10000ms', '1020', 'Netflix', 'DNS泄漏', '小火箭', 'ChatGPT', '跑路'].map((tag) => (
+            <button
+              type="button"
+              data-quick-tag={tag}
+              class="px-2 py-0.5 rounded-md bg-slate-800/80 hover:bg-cyan-950 hover:text-cyan-300 text-slate-300 border border-slate-700/60 text-[11px] transition-colors cursor-pointer"
+            >
+              #{tag}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Filter Tabs -->
+    <div class="flex items-center justify-center flex-wrap gap-2 mb-10" id="category-tabs">
+      {FAQ_CATEGORIES.map((cat, idx) => (
+        <button
+          type="button"
+          data-category={cat.id}
+          class={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer ${
+            idx === 0
+              ? 'cat-btn-active bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20'
+              : 'bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800'
+          }`}
+        >
+          {cat.label}
+        </button>
+      ))}
+    </div>
+
+    <!-- FAQ Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="faq-cards-container">
+      {FAQS_DATA.map((faq) => (
+        <a
+          href={`/faq/${faq.slug}`}
+          class="faq-card group p-5 rounded-2xl bg-slate-900/80 border border-slate-800/80 hover:border-cyan-500/50 hover:bg-slate-900 transition-all flex flex-col justify-between"
+          data-category={faq.category}
+          data-title={faq.title.toLowerCase()}
+          data-summary={faq.summary.toLowerCase()}
+        >
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2.5">
+              <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800/50">
+                {faq.categoryLabel}
+              </span>
+              <span class="text-[11px] text-slate-500 font-mono">
+                {faq.readTime}
+              </span>
+            </div>
+
+            <h2 class="text-sm sm:text-base font-bold text-white group-hover:text-cyan-400 transition-colors line-clamp-2 leading-snug">
+              {faq.title}
+            </h2>
+
+            <p class="text-xs text-slate-400 mt-2.5 line-clamp-2 leading-relaxed">
+              {faq.summary}
+            </p>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs text-cyan-400 font-medium">
+            <span>查看完整解决方案</span>
+            <span class="group-hover:translate-x-1 transition-transform">→</span>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <!-- Empty State -->
+    <div id="no-results" class="hidden text-center py-16">
+      <div class="text-4xl mb-3">🔍</div>
+      <h3 class="text-lg font-bold text-white">未找到匹配的 FAQ 指南</h3>
+      <p class="text-xs text-slate-400 mt-1">请尝试更换更简短的关键词，或重置分类筛选。</p>
+    </div>
+
+  </div>
+</BaseLayout>
+
+<script>
+  const searchInput = document.getElementById('faq-search') as HTMLInputElement;
+  const cards = document.querySelectorAll('.faq-card');
+  const catButtons = document.querySelectorAll('#category-tabs button');
+  const noResults = document.getElementById('no-results');
+  const counter = document.getElementById('search-counter');
+
+  let currentCategory = 'all';
+  let searchQuery = '';
+
+  function filterCards() {
+    let visibleCount = 0;
+
+    cards.forEach((card) => {
+      const cardCategory = card.getAttribute('data-category');
+      const cardTitle = card.getAttribute('data-title') || '';
+      const cardSummary = card.getAttribute('data-summary') || '';
+
+      const matchesCat = currentCategory === 'all' || cardCategory === currentCategory;
+      const matchesSearch = !searchQuery || cardTitle.includes(searchQuery) || cardSummary.includes(searchQuery);
+
+      if (matchesCat && matchesSearch) {
+        (card as HTMLElement).style.display = 'flex';
+        visibleCount++;
+      } else {
+        (card as HTMLElement).style.display = 'none';
+      }
+    });
+
+    if (noResults) {
+      if (visibleCount === 0) {
+        noResults.classList.remove('hidden');
+      } else {
+        noResults.classList.add('hidden');
+      }
+    }
+
+    if (counter) {
+      counter.innerHTML = `当前显示 <strong class="text-cyan-400 font-mono">${visibleCount}</strong> 篇相关指南`;
+    }
+  }
+
+  // Search input handler
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = (e.target as HTMLInputElement).value.trim().toLowerCase();
+      filterCards();
+    });
+  }
+
+  // Quick tag pills click handler
+  const quickTags = document.querySelectorAll('[data-quick-tag]');
+  quickTags.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tag = btn.getAttribute('data-quick-tag') || '';
+      if (searchInput) {
+        searchInput.value = tag;
+        searchQuery = tag.toLowerCase();
+        filterCards();
+        searchInput.focus();
+      }
+    });
+  });
+
+  // Category buttons handler
+  catButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      currentCategory = btn.getAttribute('data-category') || 'all';
+
+      catButtons.forEach((b) => {
+        b.classList.remove('cat-btn-active', 'bg-cyan-500', 'text-slate-950', 'font-bold', 'shadow-md', 'shadow-cyan-500/20');
+        b.classList.add('bg-slate-900', 'text-slate-300', 'border', 'border-slate-800');
+      });
+
+      btn.classList.add('cat-btn-active', 'bg-cyan-500', 'text-slate-950', 'font-bold', 'shadow-md', 'shadow-cyan-500/20');
+      btn.classList.remove('bg-slate-900', 'text-slate-300', 'border', 'border-slate-800');
+
+      filterCards();
+    });
+  });
+</script>

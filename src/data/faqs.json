@@ -1,0 +1,5170 @@
+[
+  {
+    "id": "faq-1",
+    "slug": "clash-verge-service-mode-error",
+    "title": "Clash Verge Rev 提示「Service Mode Not Installed」服务模式无法安装彻底解决方案",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "6 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "详细排查 Windows 与 macOS 下 Clash Verge Rev 提示服务模式未就绪或安装报错，导致 TUN 虚拟网卡无法接管系统全局流量的问题。",
+    "symptoms": [
+      "点击安装服务模式后弹窗报错「Install Service Failed」",
+      "服务模式图标常年为灰色或黄色感叹号，无法变为绿色勾选状态",
+      "开启 TUN 模式提示需要先以服务模式运行"
+    ],
+    "rootCauses": [
+      "系统安全杀毒软件（360、火绒、Windows Defender）拦截了后台注册系统服务的操作",
+      "Clash Verge Rev 安装路径包含中文字符或非标准权限目录",
+      "旧版本 Clash 遗留的 clash-core-service 注册表项冲突未清理干净"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：以管理员身份彻底重启 Clash Verge Rev",
+        "detail": "右键点击任务栏退出 Clash Verge Rev，在桌面图标上右键选择「以管理员身份运行」，赋予完整的系统服务注册提权权限。"
+      },
+      {
+        "stepTitle": "步骤 2：手动执行服务模式安装批处理脚本",
+        "detail": "进入安装目录（通常为 C:\\Program Files\\Clash Verge Rev 或 %LOCALAPPDATA%\\Programs\\Clash Verge Rev），找到 resources\\clash-verge-service.exe，右键以管理员身份运行 install.bat。",
+        "code": "cd \"C:\\Program Files\\Clash Verge Rev\\resources\"\n.\\clash-verge-service.exe install\n.\\clash-verge-service.exe start"
+      },
+      {
+        "stepTitle": "步骤 3：清理 Windows 服务注册残留",
+        "detail": "若依然报错，打开 PowerShell（管理员），运行 sc.exe delete clash_verge_service 清理残留服务，重启电脑后再次点击客户端内的一键安装即可成功。",
+        "code": "Stop-Service -Name \"clash_verge_service\" -ErrorAction SilentlyContinue\nsc.exe delete \"clash_verge_service\""
+      }
+    ],
+    "faqTips": "如果是在公司域控或学校受限电脑中，受限组策略可能会完全禁止创建非官方驱动服务，此时建议使用普通「系统代理」模式替代 TUN 模式。",
+    "relatedSlugs": [
+      "clash-tun-mode-virtual-nic-fail",
+      "clash-verge-system-proxy-reset"
+    ]
+  },
+  {
+    "id": "faq-2",
+    "slug": "clash-tun-mode-virtual-nic-fail",
+    "title": "开启 TUN 模式提示虚拟网卡适配器初始化失败 (Wintun.dll 缺失/驱动签名阻断)",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "解决在 Windows 10/11 中启用 TUN 虚拟网卡时出现 Adapter Init Failed、wintun.dll 缺失或代码 52 驱动数字签名阻断问题。",
+    "symptoms": [
+      "开启 TUN 模式瞬间网络中断，客户端日志弹出「create tun interface: wintun create adapter failed」",
+      "设备管理器中网络适配器出现黄色感叹号虚拟网卡",
+      "系统提示「Windows 无法验证此设备所需驱动程序的数字签名 (代码 52)」"
+    ],
+    "rootCauses": [
+      "Windows 11 安全中心开启了「内核隔离（内存完整性）」，阻断了老旧第三方虚拟网卡加载",
+      "缺少微软官方最新的 C++ 运行库与 Wintun 核心动态链接库",
+      "网络适配器堆栈被其他 VPN/加速器残留的 TAP-Windows 网卡占满"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：更换为 Meta (Mihomo) 最新自研内核",
+        "detail": "进入 Clash Verge 设置 -> 内核选择，切换为「Mihomo 内核」。Meta 内核直接内置了最新的官方 Wintun 驱动规范，无需依赖传统不稳定的 TAP 网卡。"
+      },
+      {
+        "stepTitle": "步骤 2：检查 Windows 安全中心的内核隔离开关",
+        "detail": "打开「Windows 安全中心」->「设备安全性」->「核心隔离详细信息」，若提示不兼容驱动，先临时关闭内核隔离并重启电脑。"
+      },
+      {
+        "stepTitle": "步骤 3：重置网络堆栈并修复 Winsock",
+        "detail": "以管理员身份打开 CMD 或 PowerShell，执行网络重置命令，彻底刷新系统适配器注册表。",
+        "code": "netsh winsock reset\nnetsh int ip reset"
+      }
+    ],
+    "faqTips": "TUN 模式可以直接接管终端命令行、不走系统代理的海外游戏和桌面应用，是目前最推荐的全局接管方案。",
+    "relatedSlugs": [
+      "clash-verge-service-mode-error",
+      "hiddify-next-windows-driver-error"
+    ]
+  },
+  {
+    "id": "faq-3",
+    "slug": "mihomo-party-startup-crash",
+    "title": "Mihomo Party 启动闪退或界面白屏无响应终极排查",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "新一代极美代理客户端 Mihomo Party 启动后白屏、黑屏、直接崩溃闪退的原因与配置重置方案。",
+    "symptoms": [
+      "双击快捷方式后窗口一闪而过，任务管理器无进程残留",
+      "客户端窗口打开后一片空白，无法渲染节点列表与侧边栏",
+      "提示「GPU Process Crashed Too Many Times」"
+    ],
+    "rootCauses": [
+      "Electron 框架与某些独立显卡驱动硬件加速冲突",
+      "缓存配置文件 config.yaml 损坏，存在未转义的特殊字符导致 YAML 解析器崩溃",
+      "端口被本地其他代理软件（如 v2rayN、老 Clash）占用"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：禁用 GPU 硬件加速启动",
+        "detail": "右键桌面 Mihomo Party 快捷方式，选择「属性」，在目标路径最后追加空格和 --disable-gpu 参数，然后点击确定重启。",
+        "code": "\"C:\\Program Files\\Mihomo Party\\Mihomo Party.exe\" --disable-gpu"
+      },
+      {
+        "stepTitle": "步骤 2：清理本地损坏的运行时缓存目录",
+        "detail": "按 Win + R 运行 %APPDATA%\\mihomo-party，将 cache 和 local-storage 文件夹重命名或删除，重新打开软件即可重新生成纯净配置文件。"
+      }
+    ],
+    "faqTips": "Mihomo Party 是开源社区近年来 UI 最现代化的客户端之一，若遇频繁白屏建议在客户端设置中常驻关闭「硬件加速」选项。",
+    "relatedSlugs": [
+      "clash-verge-mixed-port-conflict",
+      "clash-nyanpasu-core-stopped"
+    ]
+  },
+  {
+    "id": "faq-4",
+    "slug": "sing-box-config-json-syntax-error",
+    "title": "Sing-box 客户端解析 config.json 语法报错与格式快速修复",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "解析 Sing-box 客户端在导入第三方通用订阅时提示 invalid json format、outbound type unknown 等核心配置报错排查。",
+    "symptoms": [
+      "点击启动提示「parse config: json: cannot unmarshal string into Go struct」",
+      "订阅链接导入后节点解析为 0 个，控制台红字提示 schema violation",
+      "切换配置后核心自动关闭"
+    ],
+    "rootCauses": [
+      "机场返回的是 Clash YAML 格式，而直接粘贴到了 Sing-box 原生 JSON 导入框中",
+      "Sing-box 版本快速迭代，老版本字段（如 inbound 里的 sniff）在新版中被重构为 route.sniff",
+      "JSON 文件中存在中文全角逗号、多余结尾逗号或缺少花括号"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：确认订阅类型是否为 Sing-box 专属订阅",
+        "detail": "登录机场后台，必须复制标有「Sing-box 订阅」的链接，切勿将 Clash 订阅直接当作 Sing-box 配置粘贴。"
+      },
+      {
+        "stepTitle": "步骤 2：使用在线 JSON Linter 验证语法有效性",
+        "detail": "将 config.json 全文粘贴至 jsonlint.com 进行语法校验，自动标红定位多余的逗号或缺失的双引号并一键格式化修复。"
+      },
+      {
+        "stepTitle": "步骤 3：升级 Sing-box 核心至 1.9+ 或 1.10+ 最新稳定版",
+        "detail": "检查客户端使用的 sing-box 核心版本，确保与机场提供的最新协议规范保持一致。"
+      }
+    ],
+    "faqTips": "Sing-box 的优势在于资源开销极小且原生支持 Hysteria 2 与 TUIC 协议，如果不想手调 JSON，建议使用图形化壳子（如 Karing 或 GUI.for.SingBox）。",
+    "relatedSlugs": [
+      "sing-box-inbound-tun-mtu",
+      "karing-client-multi-protocol-setup"
+    ]
+  },
+  {
+    "id": "faq-5",
+    "slug": "shadowrocket-subscription-timeout",
+    "title": "iOS 小火箭 (Shadowrocket) 订阅更新一直转圈提示 Timeout 解决",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "苹果 iPhone/iPad 用户在 Shadowrocket 下拉更新订阅链接时，一直转圈并弹出「Network Request Timeout」超时的解决全解。",
+    "symptoms": [
+      "在首页下拉刷新订阅，进度条转动超过 30 秒最终提示请求超时",
+      "节点更新时间停留在数天前，无法获取最新的可用节点列表",
+      "连上家里 Wi-Fi 无法更新，切换到 4G/5G 数据网络依然失败"
+    ],
+    "rootCauses": [
+      "机场订阅服务器域名被国内本地 DNS 污染阻断无法解析",
+      "iOS 系统网络权限中禁用了小火箭的「无线局域网与蜂窝网络」",
+      "客户端当前未开启代理，而该订阅域名本身位于境外阻断名单中"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：开启现有任意存活节点后再点击更新订阅",
+        "detail": "只要列表中还有一个能勉强连通的备用节点，先点击开启小火箭代理，再在首页下拉刷新订阅。此时订阅请求将走境外代理通道，直接绕过国内阻断。"
+      },
+      {
+        "stepTitle": "步骤 2：更换小火箭内置 DNS 节点",
+        "detail": "进入小火箭「设置」->「DNS」-> 修改为 223.5.5.5 或 119.29.29.29，同时添加备用境外 DNS 1.1.1.1，防止域名解析失败。"
+      },
+      {
+        "stepTitle": "步骤 3：登录机场后台获取备用订阅转换域名",
+        "detail": "进入机场后台用户中心，很多优质机场提供了防污染备用订阅链接或短链服务，将其重新导入小火箭替换即可。"
+      }
+    ],
+    "faqTips": "强烈建议在小火箭「设置」->「订阅」中打开「打开时更新」与「自动后台更新」开关，确保节点时刻保持最新。",
+    "relatedSlugs": [
+      "shadowrocket-nodes-missing",
+      "shadowrocket-node-group-auto-test"
+    ]
+  },
+  {
+    "id": "faq-6",
+    "slug": "v2rayng-battery-optimization-kill",
+    "title": "Android v2rayNG 在后台被系统杀掉断网处理 (小米/华为/OPPO/vivo)",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "安卓手机锁屏待机或切换应用数分钟后，v2rayNG VPN 图标自动消失并断开外网连接的保活设置全攻略。",
+    "symptoms": [
+      "手机息屏十分钟后，微信海外推送或 Telegram 接收不到任何消息",
+      "解锁手机发现通知栏顶部的小钥匙 VPN 图标已消失",
+      "重新打开 v2rayNG 提示服务已停止运行"
+    ],
+    "rootCauses": [
+      "国产定制 Android 系统（HyperOS、鸿蒙、ColorOS、OriginOS）极致激进的后台电池优化策略",
+      "未开启「允许自启动」与「允许关联启动」权限",
+      "未给 v2rayNG 锁定后台多任务卡片"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：将电池优化设置为「无限制/不优化」",
+        "detail": "长按 v2rayNG 图标 -> 应用信息 -> 省电策略/电池优化 -> 勾选「无限制」（允许在后台常驻运行，不限制后台活动）。"
+      },
+      {
+        "stepTitle": "步骤 2：多任务卡片加锁并允许自启动",
+        "detail": "在手机多任务管理界面中，按住 v2rayNG 卡片向下拉动，点击「小锁」图标加锁；同时在手机权限管理中打开「允许自启动」开关。"
+      },
+      {
+        "stepTitle": "步骤 3：在软件内开启常驻通知栏",
+        "detail": "打开 v2rayNG -> 设置 -> 勾选「显示常驻通知」，通过 Android 系统原生前台服务保活机制避免被内存回收机制清理。"
+      }
+    ],
+    "faqTips": "如果系统版本较高，还可在系统设置的「VPN」选项中，点击 v2rayNG 后方的齿轮图标，勾选「始终开启的 VPN」以达到系统级守护。",
+    "relatedSlugs": [
+      "harmonyos-next-proxy-compatibility",
+      "android-private-dns-conflict-proxy"
+    ]
+  },
+  {
+    "id": "faq-7",
+    "slug": "quantumult-x-mitm-cert-untrusted",
+    "title": "Quantumult X 抓包与 MitM CA 证书未信任报错彻底解决",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "iOS 圈 X (Quantumult X) 开启 HTTPS 解密重写与脚本时，提示证书未信任、无法解密流量的实操指引。",
+    "symptoms": [
+      "配置完去广告重写规则后，目标 App 提示网络不可用或无法建立安全连接",
+      "圈 X 日志大量提示「MitM Handshake failed: certificate untrusted」",
+      "Safari 访问网页提示「此网站证书不受信任」"
+    ],
+    "rootCauses": [
+      "在圈 X 中生成了自签名 CA 证书并下载了描述文件，但在 iOS 系统中未进行最终的信任授权",
+      "证书有效期已过，或重新安装圈 X 后未重新生成唯一专属证书",
+      "重写主机名 (hostname) 列表包含过于宽泛的泛域名通配符导致全网证书冲突"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：圈 X 内生成并安装证书",
+        "detail": "进入圈 X 核心设置 -> MitM -> 点击「生成证书」-> 点击「配置证书」-> 跳转到 Safari 允许下载描述文件。"
+      },
+      {
+        "stepTitle": "步骤 2：在 iOS 系统设置中安装描述文件",
+        "detail": "打开 iPhone「设置」-> 顶部出现「已下载描述文件」-> 点击「安装」并输入手机锁屏密码完成安装。"
+      },
+      {
+        "stepTitle": "步骤 3：关键一步：进入系统完全信任根证书",
+        "detail": "打开 iPhone「设置」->「通用」->「关于本机」-> 滑到最底部点击「证书信任设置」-> 在针对根证书启用完全信任下，找到 Quantumult X 并「开启绿色开关」。"
+      }
+    ],
+    "faqTips": "如果只需要普通的科学上网看视频查资料，完全不需要开启 MitM 功能；MitM 仅在需要去应用内置广告或跑自动打卡脚本时才需开启。",
+    "relatedSlugs": [
+      "shadowrocket-subscription-timeout",
+      "surge-rule-set-import-fail"
+    ]
+  },
+  {
+    "id": "faq-8",
+    "slug": "clash-for-windows-legacy-migration",
+    "title": "Clash for Windows (CFW) 停更后安全迁移到 Clash Verge Rev 全流程",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "6 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "手把手指导如何安全停用已停更的老旧 CFW，平滑迁移订阅与自定义规则至活跃维护的 Clash Verge Rev 客户端。",
+    "symptoms": [
+      "继续使用老旧 CFW 经常遇到新协议（如 Hysteria 2、Vless-Reality）无法识别报错",
+      "老版本 Electron 存在已披露的安全执行漏洞",
+      "无法使用现代高分辨率缩放与 Windows 11 暗黑主题"
+    ],
+    "rootCauses": [
+      "原 CFW 开发者于 2023 年底停止维护并删库，内核永久停留在旧版 Clash Premium",
+      "新一代主流机场全面转向 Mihomo (Meta) 内核，旧客户端不再兼容新规则集语法"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：从 GitHub 官方发布页下载 Clash Verge Rev",
+        "detail": "认准官方活跃分支 clash-verge-rev/clash-verge-rev，在 Releases 中下载 Clash.Verge_x.x.x_x64-setup.exe 安装包。"
+      },
+      {
+        "stepTitle": "步骤 2：彻底退出并卸载旧版 CFW",
+        "detail": "先在老 CFW 设置中关闭「System Proxy」和「Start with Windows」，随后退出并卸载，防止两者在 7890 端口上产生抢占冲突。"
+      },
+      {
+        "stepTitle": "步骤 3：在 Verge 中导入原订阅并开启 TUN 模式",
+        "detail": "打开 Clash Verge Rev，在「订阅」页面粘贴你的机场订阅链接，点击导入即可无缝继承全部节点，同时享受更强大的 Meta 核心加速。"
+      }
+    ],
+    "faqTips": "Clash Verge Rev 现已成为 Windows / macOS / Linux 桌面端最主流的通用主力客户端，拥有极佳的稳定性和活跃的社区更新。",
+    "relatedSlugs": [
+      "clash-verge-service-mode-error",
+      "clash-meta-alpha-core-update"
+    ]
+  },
+  {
+    "id": "faq-9",
+    "slug": "surge-rule-set-import-fail",
+    "title": "Surge 规则集 (RULE-SET) 远程更新失败与本地镜像缓存策略",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "macOS/iOS 平台顶级代理工具 Surge 更新外部规则列表时出现 Fetching rule-set failed 的优化策略。",
+    "symptoms": [
+      "Surge 日志中频繁刷红提示「Rule-set [xxx] failed to load, using cached version」",
+      "规则列表因长时间拉取失败导致分流策略错乱，国内网站被误走代理",
+      "手动点击重新加载规则长时间卡在 0%"
+    ],
+    "rootCauses": [
+      "引用的 GitHub Raw 规则地址直接访问国内 DNS 遭到污染或速率限制",
+      "外部规则集 URL 链接由于上游作者改名或删库导致 404 Not Found",
+      "Surge 的 update-interval 间隔过短被 GitHub API 频率限制"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：给 GitHub 规则地址添加加速镜像前缀",
+        "detail": "编辑 Surge 配置文件，在 raw.githubusercontent.com 规则 URL 前添加常用的加速反代前缀（如 ghproxy.net）。"
+      },
+      {
+        "stepTitle": "步骤 2：在 Surge 规则集后指定代理策略走境外出站",
+        "detail": "在 RULE-SET 定义行最后指定 update-interval 并在 policy 中明确走代理节点更新，例如：RULE-SET,https://...,DIRECT,update-interval=86400。"
+      }
+    ],
+    "faqTips": "尽量选用大维护团队维护的多合一规则集库（如 Loyalsoldier），避免引用年久失修的个人零散规则链接。",
+    "relatedSlugs": [
+      "quantumult-x-mitm-cert-untrusted",
+      "surge-enhanced-mode-router-gateway"
+    ]
+  },
+  {
+    "id": "faq-10",
+    "slug": "clash-verge-mixed-port-conflict",
+    "title": "Clash 混合端口 7890 提示「Port Already in Use」端口冲突解决",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "启动客户端时核心报错，提示 7890 或 9090 端口已被其他进程占用导致代理无法正常监听。",
+    "symptoms": [
+      "Clash 核心启动日志标红：listen tcp 127.0.0.1:7890: bind: address already in use",
+      "虽然界面打开了，但是系统代理开关打开后依然无法科学上网",
+      "外部控制端口 9090 冲突导致 Web UI 无法连接"
+    ],
+    "rootCauses": [
+      "后台有未退出的残留 Clash 进程（如任务管理器中的 clash-meta.exe 僵尸进程）",
+      "同时开启了其他代理工具（v2rayN、QQ加速器、网易云解锁等）占用了默认 7890 端口",
+      "Windows Hyper-V 动态端口范围保留占用了 7890 端口"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：排查并结束占用 7890 端口的进程",
+        "detail": "以管理员身份打开 CMD，运行 netstat -ano | findstr 7890 查找占用该端口的 PID 进程号，然后在任务管理器中结束对应进程。",
+        "code": "netstat -ano | findstr 7890\ntaskkill /F /PID <查询到的PID>"
+      },
+      {
+        "stepTitle": "步骤 2：直接在客户端设置中更换默认端口",
+        "detail": "如果不想排查其他软件，直接进入 Clash Verge Rev 设置 ->「混合端口 (Mixed Port)」，将其从 7890 修改为 7892 或 10808，点击保存即可立刻恢复正常。"
+      }
+    ],
+    "faqTips": "如果修改了端口，终端或其他手动设置过 http_proxy=127.0.0.1:7890 的脚本也需要同步更新对应端口号。",
+    "relatedSlugs": [
+      "clash-verge-service-mode-error",
+      "clash-nyanpasu-core-stopped"
+    ]
+  },
+  {
+    "id": "faq-11",
+    "slug": "loon-plugin-parser-error",
+    "title": "iOS Loon 插件与订阅转换解析失败应对方案",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "iOS 平台高阶工具 Loon 导入第三方插件时提示 Parser Error 无法加载插件脚本的修复指南。",
+    "symptoms": [
+      "导入外部 .plugin 文件时提示「Plugin syntax invalid」",
+      "开启插件后特定海外网站直接报 500 错误打不开",
+      "订阅配置中的 Script 脚本无法从 GitHub 下载"
+    ],
+    "rootCauses": [
+      "插件引用的外部 JS 脚本地址在国内网络环境下无法直连拉取",
+      "Loon 版本较低，插件使用了新版专有的 arguments 参数特性",
+      "插件与当前的 MitM 证书状态不匹配"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：确保已正确安装并完全信任 Loon CA 证书",
+        "detail": "进入 Loon 设置 -> 配置证书 -> 安装并前往 iPhone 系统设置开启完全信任。"
+      },
+      {
+        "stepTitle": "步骤 2：在插件配置中启用走代理下载脚本",
+        "detail": "在 Loon 节点列表中先挑选一个正常的可用节点，确保网络整体处于代理状态后再点击插件界面的「重新加载插件脚本」。"
+      }
+    ],
+    "faqTips": "Loon 拥有强大的节点管理能力，日常使用建议仅保留必要的流媒体解锁检测插件，精简冗余脚本以提升响应速度。",
+    "relatedSlugs": [
+      "quantumult-x-mitm-cert-untrusted",
+      "shadowrocket-subscription-timeout"
+    ]
+  },
+  {
+    "id": "faq-12",
+    "slug": "nekoray-singbox-core-switch",
+    "title": "NekoBox / NekoRay 切换 Sing-box 内核与 Xray 内核崩溃问题",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "针对桌面端 NekoRay 在 Sing-box 核心与 Xray 核心之间切换时提示 core stopped unexpectedly 的排查。",
+    "symptoms": [
+      "在设置中切换 Core 为 sing-box 后，点击启动立即闪退",
+      "日志提示「sing-box core not found in directory」",
+      "某些新协议在 Xray 核心下提示 unsupported protocol"
+    ],
+    "rootCauses": [
+      "NekoRay 根目录没有下载匹配的 sing-box-core 独立执行文件",
+      "旧版订阅规则包含 Xray 专有 routing 字段，Sing-box 无法向下兼容解析",
+      "系统杀毒软件将解压的 sing-box.exe 误判并隔离"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：手动下载完整核心包覆盖",
+        "detail": "前往 NekoRay 官方发布页，务必下载带有「-with-core」后缀的完整版本，或者手动下载最新 sing-box.exe 放置到软件根目录下。"
+      },
+      {
+        "stepTitle": "步骤 2：重置路由设置",
+        "detail": "进入「基本设置」->「路由设置」，点击「恢复默认设置」，自动适配当前选定内核的标准路由策略。"
+      }
+    ],
+    "faqTips": "NekoRay 是少数在 Windows/Linux 上原生同时支持 Xray 和 Sing-box 的优秀客户端，适合协议极客深度定制。",
+    "relatedSlugs": [
+      "sing-box-config-json-syntax-error",
+      "v2rayn-core-path-not-found"
+    ]
+  },
+  {
+    "id": "faq-13",
+    "slug": "clash-verge-script-override-error",
+    "title": "Clash Verge Rev 扩展脚本 Script Override 报错 syntax error 修复",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "用户在 Clash Verge Rev 中使用 JavaScript 进行配置预处理脚本 (Script / Merge) 覆盖时报错的修复步骤。",
+    "symptoms": [
+      "点击刷新订阅后提示「Merge script error: ReferenceError: main is not defined」",
+      "自定义的 rules 规则没有生效，全部节点配置变为空白",
+      "控制台输出 Uncaught SyntaxError: Unexpected token"
+    ],
+    "rootCauses": [
+      "Clash Verge Rev 已经全面采用现代 ESModule 标准，旧版的 CommonJS `module.exports = main` 语法不再支持",
+      "JavaScript 脚本中访问了不存在的字段引发空指针异常",
+      "规则数组拼接使用了 push 却没有做前置存在性检查"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：按照最新规范定义 main 入口函数",
+        "detail": "确保脚本结构严格遵循官方规范：function main(config, profileName) { return config; }，并在最后 export default main;",
+        "code": "function main(config, profileName) {\n  // 确保 rules 存在\n  if (!config.rules) config.rules = [];\n  config.rules.unshift(\"DOMAIN-SUFFIX,google.com,PROXY\");\n  return config;\n}\n\n// 必须使用 export 导出\nexport default main;"
+      },
+      {
+        "stepTitle": "步骤 2：利用客户端内置的预览功能单步调试",
+        "detail": "在「扩展脚本」编辑面板中，点击右上角的「预览」按钮，查看当前脚本转换后的实时配置 YAML 输出，确认是否有 syntax 抛错。"
+      }
+    ],
+    "faqTips": "如果对 JavaScript 语法不熟悉，建议直接使用更简单的 YAML 键值替换方式（Merge 配置），直观且不易出错。",
+    "relatedSlugs": [
+      "clash-verge-service-mode-error",
+      "clash-meta-alpha-core-update"
+    ]
+  },
+  {
+    "id": "faq-14",
+    "slug": "shadowrocket-nodes-missing",
+    "title": "小火箭导入订阅后节点列表为空，或只显示一个 Direct 节点排查",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "新手使用 iOS 小火箭导入机场提供的链接后，首页没有任何节点出现，只有默认 Direct/Proxy 分组的解决办法。",
+    "symptoms": [
+      "扫码或导入 URL 成功，但小火箭列表中没有香港、日本等具体节点名称",
+      "点击连接后直接报「No active proxy server available」",
+      "订阅名称后显示 0 bytes / 0 servers"
+    ],
+    "rootCauses": [
+      "复制的并不是节点订阅链接，而是机场后台的登录网址或普通官网 URL",
+      "机场订阅被防火墙拦截，返回了 403/502 错误网页源码，小火箭无法将其解析为节点格式",
+      "导入时类型选择错误（例如把 Base64 订阅强制选成了 Trojan 独立协议）"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：检查复制链接是否以 http/https 开头且带有 token/code",
+        "detail": "标准订阅链接通常类似于 https://xxx.com/api/v1/client/subscribe?token=...，若复制成了官网主页则完全无法解析。"
+      },
+      {
+        "stepTitle": "步骤 2：直接在 Safari 浏览器中打开该订阅链接验证",
+        "detail": "将该链接粘贴到手机 Safari 中访问，如果页面下载了一个文本文件或显示了一长串加密字符，说明链接有效；如果显示 Cloudflare 拦截或 404，说明链接已被阻断，需联系机场客服获取新域名。"
+      },
+      {
+        "stepTitle": "步骤 3：在小火箭中选择「Subscribe (订阅)」类型导入",
+        "detail": "点击右上角加号，类型一定要选择「Subscribe」，而不是单节点协议，粘贴后点击右上角完成即可刷新出全部节点。"
+      }
+    ],
+    "faqTips": "现在大部分优质机场（如隐形人、暮光等）都支持在用户后台直接点击「一键导入小火箭」，无需手动复制粘贴链接。",
+    "relatedSlugs": [
+      "shadowrocket-subscription-timeout",
+      "shadowrocket-node-group-auto-test"
+    ]
+  },
+  {
+    "id": "faq-15",
+    "slug": "hiddify-next-windows-driver-error",
+    "title": "Hiddify Next 在 Windows 下提示 wintun.dll 缺失处理",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "开源跨平台客户端 Hiddify Next 开启 TUN 模式时报错 Wintun driver failure 解决方法。",
+    "symptoms": [
+      "在 Hiddify Next 切换为 VPN 模式提示「Cannot install virtual interface」",
+      "日志提示 LoadLibrary wintun.dll failed (error 126)",
+      "系统未弹出网络配置更改授权窗口"
+    ],
+    "rootCauses": [
+      "绿色便携免安装版在移动解压时丢失了位于 bin/ 目录下的 wintun 驱动动态库",
+      "第三方杀毒软件误拦截了驱动文件的临时加载"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：下载官方标准 MSI / Setup 安装包",
+        "detail": "尽量避免使用单可执行便携版，下载官方提供的 .msi 安装包，安装程序会自动向 Windows System32 注册所需驱动。"
+      },
+      {
+        "stepTitle": "步骤 2：手动补充官方 Wintun 动态链接库",
+        "detail": "从 wintun.net 官方开源仓库下载对应平台（x64 或 arm64）的 wintun.dll，拷贝进 Hiddify 安装目录即可立即解决。"
+      }
+    ],
+    "faqTips": "Hiddify Next 优势在于多协议整合极简设计，界面美观，也是目前非常值得推荐的通用客户端之一。",
+    "relatedSlugs": [
+      "clash-tun-mode-virtual-nic-fail",
+      "sing-box-config-json-syntax-error"
+    ]
+  },
+  {
+    "id": "faq-16",
+    "slug": "clash-meta-alpha-core-update",
+    "title": "手动升级 Clash Verge 的 Mihomo (Meta) 内核至最新 Alpha 版本",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "教你如何手动替换 Clash Verge Rev 中的 Mihomo 核心文件，抢先体验最新协议特性与性能修复。",
+    "symptoms": [
+      "客户端稳定版发布滞后，无法使用最新的 Hysteria 2 端口跳跃或新分流特性",
+      "老核心在某些高带宽并发场景下 CPU 占用过高",
+      "某些新特性被机场要求必须在 Mihomo 1.18+ 以上才可支持"
+    ],
+    "rootCauses": [
+      "客户端发行版打包的通常是稳定的 Release 内核，更新周期慢于核心开发者的日常迭代"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：从 MetaCubeX 官方仓库下载最新 Alpha 内核",
+        "detail": "前往 github.com/MetaCubeX/mihomo/releases，在预发布版本中找到与系统架构匹配的压缩包（如 mihomo-windows-amd64-alpha-xxxx.zip）。"
+      },
+      {
+        "stepTitle": "步骤 2：解压并重命名覆盖客户端核心文件",
+        "detail": "退出客户端，进入 Clash Verge 数据目录（设置 -> 内核 -> 点击打开内核目录），将下载的文件重命名为 clash-meta.exe（或 mihomo.exe）替换原文件，随后重启客户端即可。"
+      }
+    ],
+    "faqTips": "替换前建议将原内核备份为 clash-meta-old.exe，以便遇到 Alpha 尝鲜版不稳定时随时一键回退。",
+    "relatedSlugs": [
+      "clash-verge-service-mode-error",
+      "clash-for-windows-legacy-migration"
+    ]
+  },
+  {
+    "id": "faq-17",
+    "slug": "flclash-cross-platform-sync",
+    "title": "FlClash 跨平台客户端在 Linux / Android 同步配置报错修复",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "使用 Flutter 构建的多平台客户端 FlClash 配置文件同步或局域网导入报错排错。",
+    "symptoms": [
+      "通过 WebDAV 同步配置时提示 401 Unauthorized 或 404",
+      "Android 手机无法扫描桌面端生成的局域网同步二维码",
+      "保存自定义规则后没有在节点列表体现"
+    ],
+    "rootCauses": [
+      "移动端与电脑端不在同一个局域网网段，或电脑端开启了防火墙阻断了入站探测",
+      "WebDAV 服务地址末尾缺少斜杠 / 导致路径拼接异常"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：排查局域网防火墙规则",
+        "detail": "确保电脑与手机连接在同一个家庭 Wi-Fi 频段（切勿一台在访客网络另一台在主网），并在电脑防火墙中允许 FlClash 入站。"
+      },
+      {
+        "stepTitle": "步骤 2：直接使用订阅链接手动添加",
+        "detail": "若局域网二维码识别困难，推荐直接在手机端微信或浏览器中通过复制机场订阅链接导入，更加稳定直接。"
+      }
+    ],
+    "faqTips": "FlClash 界面极其现代简洁，适合追求全平台（手机、平板、电脑）UI 风格统一的用户。",
+    "relatedSlugs": [
+      "clash-verge-service-mode-error",
+      "stash-icloud-sync-conflict"
+    ]
+  },
+  {
+    "id": "faq-18",
+    "slug": "clash-verge-system-proxy-reset",
+    "title": "每次关机重启后 Windows 系统代理开关自动开启/残留代理排查",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "关机或非正常关闭 Clash 后，电脑重启无法上网，浏览器提示「无法连接到代理服务器」的根本解决办法。",
+    "symptoms": [
+      "电脑开机后不打开代理软件连微信、百度都打不开，提示代理错误",
+      "每次进入 Windows 设置手动关掉代理，过几分钟又被自动打开",
+      "日志频繁显示 127.0.0.1:7890 拒绝连接"
+    ],
+    "rootCauses": [
+      "Windows 关机前 Clash 未执行正常的反注册退出流程，导致注册表中 ProxyEnable 依然标记为 1",
+      "后台有其他流氓软件（某些网盘加速、浏览器插件）锁定了注册表代理键值",
+      "开启了开机自启但在服务启动前系统就尝试访问网络"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在客户端中正常「关闭系统代理」并安全退出",
+        "detail": "养成习惯：电脑关机或不需要代理时，先在客户端主界面手动将「系统代理」开关置为关闭状态，再右键任务栏图标选择「退出」。"
+      },
+      {
+        "stepTitle": "步骤 2：一键重置 Windows 注册表代理开关",
+        "detail": "在 PowerShell 中运行以下一行命令，强制将注册表代理标记清零，立即恢复国内直连上网能力。",
+        "code": "Set-ItemProperty -Path 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings' -Name ProxyEnable -Value 0"
+      }
+    ],
+    "faqTips": "若经常遇到此问题，建议在 Clash Verge Rev 设置中开启「TUN 模式」替代「系统代理模式」，TUN 模式由系统虚拟网卡管理，关机时绝不残留任何代理注册表垃圾。",
+    "relatedSlugs": [
+      "clash-verge-service-mode-error",
+      "windows-11-system-proxy-auto-tampered"
+    ]
+  },
+  {
+    "id": "faq-19",
+    "slug": "clash-nyanpasu-core-stopped",
+    "title": "Clash Nyanpasu 启动后核心自动停止 (Core Stopped) 修复指南",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "二次元风格客户端 Clash Nyanpasu 在启动内核时提示 Core Stopped 且日志为空的快速修复。",
+    "symptoms": [
+      "点击启动核心，状态栏短暂变绿后又立即变红变为 Core Stopped",
+      "控制台没有任何网络日志输出",
+      "切换不同的订阅后依然无法唤醒核心"
+    ],
+    "rootCauses": [
+      "用户订阅配置文件中包含了 Mihomo 当前版本无法解析的特殊字符（如未转义的表情符号或冒号）",
+      "运行内存受限或防护软件强制结束了后台子进程"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：新建一个纯净空白 Profile 配置文件排查",
+        "detail": "在 Profiles 页面新建一个空的默认配置并启用，如果核心能成功启动，说明核心本身正常，问题出在特定机场的订阅 YAML 内容中。"
+      },
+      {
+        "stepTitle": "步骤 2：检查订阅 YAML 的编码格式",
+        "detail": "确保订阅文件保存为 UTF-8 无 BOM 格式，避免非标准字符导致 YAML 解析器直接中止退出。"
+      }
+    ],
+    "faqTips": "如果排查复杂，建议直接切换至主流稳定的 Clash Verge Rev，兼容性更广，社区文档也更完善。",
+    "relatedSlugs": [
+      "clash-verge-mixed-port-conflict",
+      "mihomo-party-startup-crash"
+    ]
+  },
+  {
+    "id": "faq-20",
+    "slug": "stash-icloud-sync-conflict",
+    "title": "iOS / Mac 平台 Stash 配置文件 iCloud 云同步冲突与版本恢复",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "Stash 客户端在 iPhone 和 Mac 之间通过 iCloud 同步分流规则时提示冲突或配置回滚的应对方案。",
+    "symptoms": [
+      "在 Mac 端添加的规则在手机上被旧版本覆盖",
+      "Stash 设置中 iCloud 状态显示「Sync Pending」甚至报错",
+      "节点分组被重置为初始状态"
+    ],
+    "rootCauses": [
+      "多台设备在断网状态下同时修改了配置，导致苹果 iCloud 产生分支版本冲突",
+      "iCloud 空间已满或手机处于低电量模式暂停了后台数据同步"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在 Stash 中导出本地副本备份",
+        "detail": "在修改重大规则前，先在 Stash「配置」页面选择「导出配置为本地文件」，保存好应急备份。"
+      },
+      {
+        "stepTitle": "步骤 2：强制在文件 App 中处理 iCloud 冲突文件",
+        "detail": "打开 iPhone「文件」App -> iCloud 云盘 -> Stash 文件夹，如果看到标有 (1) 或 Conflict 后缀的文件，删除旧文件并保留最新的一份。"
+      }
+    ],
+    "faqTips": "Stash 是 iOS / Mac 生态中深度适配 Clash 规则体系的高颜值利器，支持 Siri 捷径与磁贴小组件，非常适合果粉全家桶。",
+    "relatedSlugs": [
+      "surge-rule-set-import-fail",
+      "shadowrocket-subscription-timeout"
+    ]
+  },
+  {
+    "id": "faq-21",
+    "slug": "karing-client-multi-protocol-setup",
+    "title": "新兴多平台客户端 Karing 配置多协议订阅与分流规则指南",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "跨 iOS / Android / Windows / Mac 的新兴客户端 Karing 零门槛导入订阅与分流调优全流程。",
+    "symptoms": [
+      "初次使用不知如何配置多协议聚合订阅",
+      "节点延迟测试全部超时或无法智能分流",
+      "需要实现国内直连、海外代理、AI 专属节点的自动化策略"
+    ],
+    "rootCauses": [
+      "Karing 基于 Sing-box 核心构建，需要根据规则集自动匹配 routing 策略"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：添加订阅源",
+        "detail": "打开 Karing -> 点击右上角加号 -> 选择「添加订阅」-> 粘贴机场提供的 Clash 或 Sing-box 订阅链接即可自动识别并解析节点。"
+      },
+      {
+        "stepTitle": "步骤 2：选择智能路由分流模式",
+        "detail": "在主界面路由策略中选择「绕过大陆 (Bypass CN)」或「规则模式 (Rule)」，保证国内应用直连不受任何影响。"
+      }
+    ],
+    "faqTips": "Karing 已经在各大平台官方应用商店（如 App Store、Google Play）直接上架，对于没有美区 Apple ID 的朋友是极佳的免费选择。",
+    "relatedSlugs": [
+      "sing-box-config-json-syntax-error",
+      "clash-for-windows-legacy-migration"
+    ]
+  },
+  {
+    "id": "faq-22",
+    "slug": "clash-verge-dark-mode-font-blur",
+    "title": "Clash Verge Rev 4K 高分屏字体模糊与暗黑模式适配优化",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "3 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "在 2K / 4K 高分辨率显示屏下使用 Clash Verge 界面字体发虚或暗黑模式对比度不舒服的调节技巧。",
+    "symptoms": [
+      "在高 DPI 缩放（如 150%、200%）下文字有重影或锯齿",
+      "夜间使用亮色界面刺眼，开启暗黑模式后部分节点文字无法看清"
+    ],
+    "rootCauses": [
+      "Windows 缩放 DPI 未交由应用程序自主渲染",
+      "未启用现代 Webview2 / 自定义主题引擎"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：修改高 DPI 覆盖设置",
+        "detail": "右键桌面快捷方式 ->「属性」->「兼容性」->「更改高 DPI 设置」-> 勾选「替代高 DPI 缩放行为」并选择「应用程序」。"
+      },
+      {
+        "stepTitle": "步骤 2：在客户端内切换主题与字体",
+        "detail": "进入 Clash Verge Rev 设置 ->「界面设置」-> 选择「跟随系统暗黑模式」，并在自定义字体中填入 Microsoft YaHei UI 或 Inter。"
+      }
+    ],
+    "faqTips": "最新的 Clash Verge Rev 采用现代 Web 技术重构，界面的高刷新率与字体清晰度均大幅领先老款 CFW。",
+    "relatedSlugs": [
+      "clash-for-windows-legacy-migration",
+      "mihomo-party-startup-crash"
+    ]
+  },
+  {
+    "id": "faq-23",
+    "slug": "sing-box-inbound-tun-mtu",
+    "title": "Sing-box 自定义 TUN 入站 MTU 调优防止网页卡死与高丢包",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "针对 Sing-box 开启虚拟网卡后大文件传输慢、网页加载一半突然卡住的 MTU 调优实战。",
+    "symptoms": [
+      "普通文字网页秒开，但打开图片很多的大型网站长时间白屏",
+      "测速下行很高，但上传文件或发送邮件附件直接超时",
+      "日志中经常看到 packet too large, fragmentation required 提示"
+    ],
+    "rootCauses": [
+      "默认 MTU 设为 1500，加上外层代理协议（如 Vless/Hysteria）加密封装包头后超过了物理网卡上限，导致链路层发生严重分片甚至丢包"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：打开 Sing-box config.json 的 inbound 配置",
+        "detail": "在 inbounds 数组中找到 type 为 tun 的配置对象，添加或修改 mtu 字段。"
+      },
+      {
+        "stepTitle": "步骤 2：推荐将 MTU 调整为 9000（局域网）或 1400（公网防分片）",
+        "detail": "针对常规公网科学上网，推荐将 MTU 设为 1400 或 1350，预留充足的协议包头缓冲区。",
+        "code": "{\n  \"type\": \"tun\",\n  \"inet4_address\": \"172.19.0.1/30\",\n  \"auto_route\": true,\n  \"strict_route\": true,\n  \"mtu\": 1400\n}"
+      }
+    ],
+    "faqTips": "如果使用 Hysteria 2 协议，适当调小 MTU 能够大幅改善晚高峰在移动宽带等劣化网络下的网页秒开体验。",
+    "relatedSlugs": [
+      "error-mtu-packet-fragmentation",
+      "sing-box-config-json-syntax-error"
+    ]
+  },
+  {
+    "id": "faq-24",
+    "slug": "shadowrocket-node-group-auto-test",
+    "title": "小火箭设置定时自动测速与最优延迟节点自动切换策略",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "教你在 iPhone 小火箭中配置 URL-Test 自动优选策略组，遇到节点临时断连无需手动切换。",
+    "symptoms": [
+      "正在看视频时当前节点突然维护断流，必须手动打开小火箭一个个测速换节点",
+      "不知道列表中哪个香港或日本节点此刻延迟最低"
+    ],
+    "rootCauses": [
+      "默认使用的是手动单选节点策略，缺乏动态健康检查探测"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：创建 Auto URL-Test 服务器分组",
+        "detail": "进入小火箭「服务器」列表 -> 点击右上角加号 -> 类型选择「URL Test」-> 自定义一个名称（如 自动优选专线）。"
+      },
+      {
+        "stepTitle": "步骤 2：添加候选节点与健康检查参数",
+        "detail": "在成员列表中勾选常用的 3~5 个优质专线节点，测试 URL 填入 http://www.gstatic.com/generate_204，间隔填入 300 秒，容差设为 50ms。"
+      }
+    ],
+    "faqTips": "自动优选建议仅添加同一家机场的同级别专线节点，切勿将普通直连节点与高端 IPLC 混合，以免自动跳到低速直连节点。",
+    "relatedSlugs": [
+      "shadowrocket-subscription-timeout",
+      "shadowrocket-nodes-missing"
+    ]
+  },
+  {
+    "id": "faq-25",
+    "slug": "v2rayn-core-path-not-found",
+    "title": "v2rayN 提示 Xray / V2Ray 核心路径不存在或没有执行权限彻底解决",
+    "category": "client",
+    "categoryLabel": "客户端配置",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "Windows 经典工具 v2rayN 启动报错「未找到核心文件，请检查 bin 目录」的排错指南。",
+    "symptoms": [
+      "双击打开 v2rayN 弹出红框：System.Exception: 核心启动失败，未在 bin 目录下找到 xray.exe",
+      "订阅可以更新，但无法启动服务，无法开启系统代理"
+    ],
+    "rootCauses": [
+      "解压时未将整个文件夹完全解压，或者单独把 v2rayN.exe 拖到了桌面上",
+      "Windows Defender 误将 xray.exe 移到了隔离区"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：右键完整解压整个压缩包",
+        "detail": "务必将下载的 zip 包「全部解压缩」到非 C 盘 Program Files 的普通目录（如 D:\\v2rayN-With-Core），不要在压缩包内直接双击运行。"
+      },
+      {
+        "stepTitle": "步骤 2：从软件菜单一键下载更新核心",
+        "detail": "进入 v2rayN 顶部菜单 ->「检查更新」-> 点击「下载 Xray-Core」，程序会自动连接官方源解压到 bin 目录下。"
+      }
+    ],
+    "faqTips": "现代网络环境下，建议优先使用 Clash Verge Rev，在多节点路由分流和内存管理上比传统的 v2rayN 更加省心易用。",
+    "relatedSlugs": [
+      "nekoray-singbox-core-switch",
+      "clash-for-windows-legacy-migration"
+    ]
+  },
+  {
+    "id": "faq-26",
+    "slug": "error-tls-handshake-timeout",
+    "title": "节点频繁报错「TLS handshake timeout」握手超时根源剖析与解决",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "分析 Clash / Xray 日志中频繁出现 TLS 握手超时、无法建立安全传输通道的根本原因及排查方案。",
+    "symptoms": [
+      "客户端日志大量出现：connect: TLS handshake timeout",
+      "节点在测速列表显示绿色延迟，但访问具体外网网页时加载十几秒最终报错",
+      "某些 Trojan 或 Shadowsocks-TLS 节点断断续续"
+    ],
+    "rootCauses": [
+      "GFW 防火墙对特定 TLS 握手包（特别是未经混淆的标准 Client Hello）进行了 SNI 阻断或丢包干扰",
+      "客户端电脑的系统时间与服务器真实 UTC 时间误差超过 60 秒，导致证书有效期校验超时",
+      "机场落地服务器的 TLS 证书过期或 Let's Encrypt 证书自动续签失败"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：第一步同步系统网络时间（90% 的诱因）",
+        "detail": "按 Win + I 打开 Windows 设置 ->「时间和语言」->「日期和时间」，点击「立即同步」，确保系统时间与国家授时中心秒级同步。"
+      },
+      {
+        "stepTitle": "步骤 2：切换为支持 uTLS 浏览器伪装的内核",
+        "detail": "在 Clash Verge Rev 中切换为 Mihomo 核心，并在设置中开启 uTLS（如 Chrome / Safari 指纹伪装），有效躲避 GFW 对握手特征的主动探测过滤。"
+      },
+      {
+        "stepTitle": "步骤 3：更换同机场其他 IPLC 内网专线节点",
+        "detail": "真正的 IPLC 专线走物理内网不过墙，完全不受公网 TLS 阻断影响，可立即恢复顺畅连接。"
+      }
+    ],
+    "faqTips": "如果所有节点都报 TLS 错误，请优先检查本地宽带是否被运营商开启了单向阻断，尝试用手机 5G 热点测试对比即可快速定位。",
+    "relatedSlugs": [
+      "error-clock-skew-system-time",
+      "error-certificate-verify-failed"
+    ]
+  },
+  {
+    "id": "faq-27",
+    "slug": "error-connection-reset-by-peer",
+    "title": "连接突然中断并提示「connection reset by peer」排错全解",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "排查网络连接建立后突然被对端重置 (TCP RST)、网页加载一半中断报错的实用指南。",
+    "symptoms": [
+      "看 YouTube 4K 视频看到一半突然缓冲转圈，控制台提示 connection reset by peer",
+      "下载大文件（如 GitHub Release、HuggingFace 模型）几百兆后突然连接断开无法续传",
+      "特定敏感域名一访问立刻触发长达 3 分钟的无响应"
+    ],
+    "rootCauses": [
+      "GFW 在检测到未加密或特征明显的境外敏感流量时，双向注入伪造的 TCP RST 重置报文",
+      "机场中继入口到落地机之间的链路发生瞬时抖动或单边断网",
+      "服务器端并发连接数达到上限，防火墙主动掐断非活跃会话"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：排查是否误开启了「直连 (Direct)」导致撞墙",
+        "detail": "检查分流规则，确保目标海外域名没有被误划入 DIRECT 直连规则。如果直连访问被封锁域名，必然会被 GFW 发送 RST 报文直接阻断。"
+      },
+      {
+        "stepTitle": "步骤 2：在客户端中开启 TCP 并发与保持活跃",
+        "detail": "在 Clash 配置中开启 keep-alive 与 tcp-concurrent，增加链路连接的健壮性并快速故障切换。"
+      },
+      {
+        "stepTitle": "步骤 3：选择纯物理内网 IPLC 专线",
+        "detail": "公网隧道中继在敏感时期常受 RST 干扰，建议切换至隐形人等走物理专线的节点彻底杜绝伪造重置包。"
+      }
+    ],
+    "faqTips": "TCP RST 注入是防火墙最经典的阻断手法，只要流量走完整的全加密专线通道，GFW 根本无法窥探报文内容，也就无法实施注入。",
+    "relatedSlugs": [
+      "error-tcp-rst-injection-gfw",
+      "error-eof-proxy-closed"
+    ]
+  },
+  {
+    "id": "faq-28",
+    "slug": "error-eof-proxy-closed",
+    "title": "客户端日志大量出现「EOF」错误意味着什么？如何根治",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "详细解析代理客户端输出中频繁看到的 proxy connect error: EOF 含义与彻底解决方法。",
+    "symptoms": [
+      "日志窗口频繁刷出「read tcp 127.0.0.1:xxx->...: read: connection reset by peer / EOF」",
+      "网页加载失败并显示白屏，过几秒再次刷新又恢复正常",
+      "Telegram 或海外游戏频繁重连"
+    ],
+    "rootCauses": [
+      "EOF 代表 End of File（文件结尾），在网络层表示服务端没有发送任何预期数据就突然单方面关闭了 Socket 连接",
+      "机场节点被瞬时超载打满，后端代理核心自动重启",
+      "运营商 NAT 网关超时，自动回收了长时间无流量的空闲连接"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：排查是否处于晚高峰极端拥堵期",
+        "detail": "如果在每晚 20:00~23:00 集中出现 EOF，说明该节点的出口带宽已被其他大流量用户打满，建议切换到负载较低的备选节点。"
+      },
+      {
+        "stepTitle": "步骤 2：调整客户端 TCP 保持活跃间隔",
+        "detail": "缩短客户端的 Keep-Alive 探测间隔至 15~30 秒，防止中间 NAT 路由器提前掐死连接。"
+      }
+    ],
+    "faqTips": "偶发的单次 EOF 属于正常公网丢包现象，只有当连续高频刷屏且导致网页无法打开时才需要介入排查。",
+    "relatedSlugs": [
+      "error-connection-reset-by-peer",
+      "error-dial-tcp-timeout-10000ms"
+    ]
+  },
+  {
+    "id": "faq-29",
+    "slug": "error-certificate-verify-failed",
+    "title": "报错「SSL: CERTIFICATE_VERIFY_FAILED」证书验证失败排错",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "访问外网或运行 Python/Node 脚本时频繁出现 SSL 证书自签名错误、证书不可信的原因与处理方案。",
+    "symptoms": [
+      "Python 请求报错：ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED]",
+      "浏览器访问 Google 提示「您的连接不是私密连接」NET::ERR_CERT_AUTHORITY_INVALID",
+      "git clone 报 fatal: unable to access ... SSL certificate problem"
+    ],
+    "rootCauses": [
+      "客户端开启了 MitM 解密抓包功能，但未将生成的私有 CA 证书导入系统受信任根证书颁发机构",
+      "公司内网深信服或网络行为管理防火墙正在进行中间人流量解密劫持",
+      "机场节点配置了错误的 skip-cert-verify: false 且节点使用的证书已过期"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在客户端配置中开启跳过证书验证（应急）",
+        "detail": "如果节点本身的伪装域名证书存在小问题，在 Clash 配置的对应节点下方添加 skip-cert-verify: true 即可跳过校验。",
+        "code": "proxies:\n  - name: \"香港 01 节点\"\n    type: trojan\n    server: xxx.com\n    port: 443\n    skip-cert-verify: true"
+      },
+      {
+        "stepTitle": "步骤 2：排查本地杀毒软件的「HTTPS 流量扫描」",
+        "detail": "进入卡巴斯基、ESET 或某些国产安全卫士，临时关闭其内置的「扫描加密连接/HTTPS 检测」功能，防止其插入伪造证书。"
+      }
+    ],
+    "faqTips": "切勿在生产服务器环境中随意全局关闭 SSL 校验，应优先定位是哪一个中间件注入了伪造证书。",
+    "relatedSlugs": [
+      "quantumult-x-mitm-cert-untrusted",
+      "error-tls-handshake-timeout"
+    ]
+  },
+  {
+    "id": "faq-30",
+    "slug": "error-dial-tcp-timeout-10000ms",
+    "title": "节点测速全部显示 Timeout 10000ms 终极排查六步法",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "6 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "解决打开客户端点击测速时所有节点全红、全部显示 Timeout 超时的最完整排查指南。",
+    "symptoms": [
+      "点击延迟测试后，全部几十个节点无一例外全部显示 Timeout 或 10000ms",
+      "原本昨天还能正常使用，今天打开一个外网网页都加载不出来",
+      "切换不同国家地区节点毫无反应"
+    ],
+    "rootCauses": [
+      "机场订阅域名被墙或机场服务商整体更换了解密密钥/端口",
+      "本地电脑系统时间严重不同步",
+      "本地 Windows 防火墙或第三方网络防护直接将客户端内核拉入了入站黑名单",
+      "国内宽带 DNS 发生故障，根本无法解析节点服务器的初始 IP 地址"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：同步系统北京时间（最常见）",
+        "detail": "前往 Windows 设置强制同步系统时间。时间只要差了 1 分钟以上，现代 VMess/Vless 加密握手协议会直接判定为重放攻击而拒绝连接。"
+      },
+      {
+        "stepTitle": "步骤 2：重新更新一次订阅链接",
+        "detail": "机场可能由于受到攻击或故障转移，全面更换了后端节点接入点。在订阅面板点击刷新订阅，拉取最新的节点配置。"
+      },
+      {
+        "stepTitle": "步骤 3：更换客户端内置测速 URL",
+        "detail": "有些机场屏蔽了默认的 Google 204 测速地址，进入设置将测速地址改为 http://cp.cloudflare.com/generate_204 再次测试。"
+      }
+    ],
+    "faqTips": "如果手机连 5G 热点测试所有节点是绿的，但连家里 Wi-Fi 全红，说明家里宽带运营商或路由器设置存在拦截，可尝试重启光猫更新外网 IP。",
+    "relatedSlugs": [
+      "nodes-have-ping-but-cannot-browse",
+      "all-nodes-turn-red-suddenly"
+    ]
+  },
+  {
+    "id": "faq-31",
+    "slug": "error-io-timeout-dns-resolve",
+    "title": "访问外网报错「i/o timeout」且域名解析为 0.0.0.0 故障处理",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "解决 Clash Fake-IP 模式下 DNS 冲突导致目标域名解析为 0.0.0.0 或无法完成首包交互的排错。",
+    "symptoms": [
+      "浏览器提示 ERR_NAME_NOT_RESOLVED 或 ERR_CONNECTION_TIMED_OUT",
+      "ping 目标网站直接显示来自 0.0.0.0 或 198.18.0.x 的响应超时",
+      "Clash 日志中出现 dial tcp: lookup xxx.com: i/o timeout"
+    ],
+    "rootCauses": [
+      "Clash 内置 DNS 配置的 nameserver 上游 DNS 地址在国内无法联通",
+      "Windows 本地 DNS 缓存堆积损坏",
+      "本地路由器开启了 DNS 重定向或防劫持功能，阻断了 53 端口 UDP 流量"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：刷新本地 Windows DNS 缓存",
+        "detail": "打开 CMD 运行 ipconfig /flushdns 命令清空本地堆积的过期映射缓存。",
+        "code": "ipconfig /flushdns"
+      },
+      {
+        "stepTitle": "步骤 2：优化 Clash 内置 DNS 上游服务器",
+        "detail": "在配置文件的 dns 部分，将国内 nameserver 设置为国内权威公共 DNS（如 223.5.5.5 和 119.29.29.29），境外 fallback 设置为 https://1.1.1.1/dns-query。"
+      }
+    ],
+    "faqTips": "Fake-IP 模式下解析出 198.18.x.x 是完全正常的内部保留虚拟 IP，核心会将其映射到远端真实服务器，无需惊慌。",
+    "relatedSlugs": [
+      "clash-tun-fake-ip-vs-redir-host",
+      "dns-leak-detection-fix"
+    ]
+  },
+  {
+    "id": "faq-32",
+    "slug": "error-ws-bad-handshake-403",
+    "title": "WebSocket 节点提示「WebSocket bad handshake: 403 Forbidden」解决",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "使用 VMess+WS 或 Vless+WS 协议时报 HTTP 403 握手拒绝的排查方案。",
+    "symptoms": [
+      "日志反复提示：websocket: bad handshake with status 403 Forbidden",
+      "节点一直转圈，完全没有任何下行流量产生",
+      "仅在使用 Cloudflare CDN 优选节点时出现该问题"
+    ],
+    "rootCauses": [
+      "客户端配置中的 Host 请求头或 Path 路径与服务端 Nginx/Caddy 的反向代理配置不一致",
+      "Cloudflare WAF 防火墙将该 IP 判定为恶意爬虫并拦截了 WebSocket 升级请求",
+      "机场服务端的反代回源证书失效"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：检查 ws-opts 里的 path 和 headers",
+        "detail": "查看节点配置，确保 path（如 /my-ws-path）前导斜杠完整，且 Host 请求头与服务端的伪装域名绝对完全一致。"
+      },
+      {
+        "stepTitle": "步骤 2：更新订阅获取最新的 CDN 回源路径",
+        "detail": "机场可能会因防封需要定时轮换 WebSocket 分流路径，重新拉取一次订阅即可自动匹配新路径。"
+      }
+    ],
+    "faqTips": "随着新一代 Vless-Reality 和 Hysteria 2 的普及，传统的 WebSocket+TLS 方案因握手延迟偏高已逐渐退居备用地位。",
+    "relatedSlugs": [
+      "vless-reality-anti-censorship-how-it-works",
+      "error-tls-handshake-timeout"
+    ]
+  },
+  {
+    "id": "faq-33",
+    "slug": "error-502-bad-gateway-reality",
+    "title": "Reality / Vless 节点提示 502 Bad Gateway 目标伪装站异常排查",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "连接 Vless-Reality 节点时提示 502 错误或无法连通伪装站的处理方案。",
+    "symptoms": [
+      "连接日志显示 received HTTP/1.1 502 Bad Gateway",
+      "节点无法握手，无法通过伪装站点借用证书",
+      "Reality 节点偶发性大面积失联"
+    ],
+    "rootCauses": [
+      "机场服务端借用的外部目标网站（如 www.apple.com、www.microsoft.com）对来源 SNI 进行了风控阻断",
+      "节点配置的 ShortID 或 PublicKey 公钥不匹配"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：更新订阅同步最新的 Reality 目标伪装站列表",
+        "detail": "机场管理员通常会轮换更优质、更低风控的海外大厂伪装目标网站，更新订阅即可解决。"
+      },
+      {
+        "stepTitle": "步骤 2：检查本地客户端版本是否过低",
+        "detail": "Xray 1.8.0 之前版本对某些 Reality TLS 1.3 扩展支持不全，建议升级至最新稳定版 Xray 或 Mihomo 核心。"
+      }
+    ],
+    "faqTips": "Reality 协议本身不会被 GFW 特征识别，502 多数属于服务端与伪装目标站之间的反代链路配置问题。",
+    "relatedSlugs": [
+      "vless-reality-anti-censorship-how-it-works",
+      "error-sni-mismatch-tls"
+    ]
+  },
+  {
+    "id": "faq-34",
+    "slug": "error-hysteria2-udp-rate-limit",
+    "title": "Hysteria 2 节点被运营商 QoS 限制甚至丢包 90% 处理对策",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "针对部分省份运营商（如某些地区移动或广电）对 UDP 协议暴力 QoS 限速导致 Hysteria 2 瘫痪的应对方案。",
+    "symptoms": [
+      "白天使用 Hysteria 2 节点下行可以跑满，一到晚上 8 点后速度直接跌至几百 Kbps",
+      "丢包率飙升至 80%~90%，视频严重卡顿",
+      "改用传统的 Shadowsocks 或 Trojan 协议反而能跑出正常速度"
+    ],
+    "rootCauses": [
+      "当地城域网宽带运营商在晚高峰对未知境外 UDP 流量实施了强制 QoS 队列惩罚或严格限速",
+      "Hysteria 2 的默认发包拥塞算法与当地宽带 MTU 不适配"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：开启并使用端口跳跃 (Port Hopping)",
+        "detail": "Hysteria 2 支持配置一个端口范围（例如 20000-40000），客户端定期动态切换通信端口，避免长时间固定单端口被运营商 QoS 规则抓包盯上。"
+      },
+      {
+        "stepTitle": "步骤 2：调整客户端上传与下载带宽参数",
+        "detail": "不要盲目将 up_mbps 设得过高，根据你的实际家庭上行宽带（如 50M 或 100M）如实填写，避免过度激进发包触发运营商惩罚。"
+      },
+      {
+        "stepTitle": "步骤 3：高峰期切换为走物理内网的 IPLC 专线",
+        "detail": "IPLC 内网专线走企业私网隧道，完全不走普通公网 UDP，根本不存在运营商 QoS 问题。"
+      }
+    ],
+    "faqTips": "Hysteria 2 极度适合在弱网或普通轻度拥堵时起飞，但若遇到运营商无差别绞杀 UDP 时，TCP 专线仍然是不可替代的稳定基石。",
+    "relatedSlugs": [
+      "hysteria-2-udp-protocol-deep-dive",
+      "error-udp-nat-symmetric-restricted"
+    ]
+  },
+  {
+    "id": "faq-35",
+    "slug": "dns-leak-detection-fix",
+    "title": "什么是 DNS 泄漏？如何使用 Extended Test 检测并彻底修复",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "6 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "深入剖析 DNS 泄漏带来的隐私暴露与翻墙失效风险，手把手教你配置防泄漏与无污染加密 DNS。",
+    "symptoms": [
+      "在 dnsleaktest.com 进行扩展测试，发现列表中赫然出现了本地中国电信/联通/移动的 DNS 服务器",
+      "即使开着代理，某些海外网站依然弹窗提示「检测到你的真实物理位置在大连/广州/北京」",
+      "访问特定未被直接屏蔽的海外小众网站经常被解析到反诈拦截页面"
+    ],
+    "rootCauses": [
+      "操作系统默认优先使用网卡设定的本地运营商 DNS 进行域名首轮解析",
+      "客户端分流规则中未开启针对 DNS 查询的强制远端代理转发",
+      "Windows 系统的「智能多宿主名称解析 (Smart Multi-Homed Name Resolution)」特性在所有网卡上并发发送 DNS 查询"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在线访问 dnsleaktest.com 进行 Standard / Extended Test",
+        "detail": "在开启代理的状态下打开 dnsleaktest.com，点击「Extended Test」。如果测试结果只有美国/香港等境外机房 DNS，说明安全；若出现任何中国境内的 ISP，即为存在泄漏。"
+      },
+      {
+        "stepTitle": "步骤 2：在 Clash 配置中开启 Fake-IP 与严格路由",
+        "detail": "在 dns 配置段中，将 mode 设为 fake-ip，并在 tun 模块中开启 strict-route: true，禁止系统绕过虚拟网卡向物理网卡发送 DNS 请求。"
+      },
+      {
+        "stepTitle": "步骤 3：组策略彻底禁用 Windows 智能多宿主名称解析",
+        "detail": "按 Win + R 运行 gpedit.msc，定位至「计算机配置 -> 管理模板 -> 网络 -> DNS 客户端」，双击「关闭智能多宿主名称解析」并设置为「已启用」。"
+      }
+    ],
+    "faqTips": "彻底解决 DNS 泄漏不仅关乎上网隐私安全，也是流畅解锁 Netflix 与 ChatGPT 防止被标记为国内用户的关键一步。",
+    "relatedSlugs": [
+      "ipv6-bypass-leak-proxy",
+      "clash-tun-fake-ip-vs-redir-host"
+    ]
+  },
+  {
+    "id": "faq-36",
+    "slug": "ipv6-bypass-leak-proxy",
+    "title": "IPv6 导致流量绕过代理直连甚至真实 IP 暴露修复指南",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "国内光猫普遍开通 IPv6 后，境外支持 IPv6 的网站绕过客户端代理直连撞墙或泄露国内原生地址的防护。",
+    "symptoms": [
+      "访问 ipleak.net 时，IPv4 显示为香港/美国代理 IP，而下面的 IPv6 赫然显示出本地联通/电信的原生 IPv6 地址",
+      "访问支持双栈的海外网站（如 Google、YouTube）极其缓慢甚至提示无法访问",
+      "流媒体平台判定用户在中国大陆并拒绝播放"
+    ],
+    "rootCauses": [
+      "大多数机场节点只提供纯 IPv4 出口，未对 IPv6 流量进行封装与路由转发",
+      "Windows 默认优先走 IPv6 路由直连，流量根本没有进入 Clash 的代理通道"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在 Clash 客户端设置中全局禁用 IPv6 解析",
+        "detail": "进入 Clash Verge Rev 设置 -> 在「通用设置」或「DNS 设置」中，确保「IPv6」总开关处于关闭状态，强制所有域名只返回 A 记录走 IPv4 代理。"
+      },
+      {
+        "stepTitle": "步骤 2：在电脑物理网卡属性中取消勾选 IPv6 协议（最稳妥）",
+        "detail": "按 Win + R 运行 ncpa.cpl，右键当前正在使用的以太网或 Wi-Fi 网卡 ->「属性」-> 在列表中取消勾选「Internet 协议版本 6 (TCP/IPv6)」并点击确定。"
+      }
+    ],
+    "faqTips": "对于日常科学上网，关闭本地 IPv6 不会对正常上网产生任何负面影响，反而能避开大量的路由泄漏与 CDN 识别坑。",
+    "relatedSlugs": [
+      "dns-leak-detection-fix",
+      "chatgpt-access-denied-error-1020"
+    ]
+  },
+  {
+    "id": "faq-37",
+    "slug": "error-connect-exceeded-deadline",
+    "title": "Clash 日志提示「connect: context deadline exceeded」排查方案",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "客户端在建立 TCP 连接时超过了设定的最大等待超时时间的原因排查。",
+    "symptoms": [
+      "日志频繁显示：dial tcp xxx: connect: context deadline exceeded",
+      "网页一直在转菊花，直到几十秒后才报错断开",
+      "特定节点在测速时直接被判定为超时丢弃"
+    ],
+    "rootCauses": [
+      "客户端到机场入口服务器之间的物理网络丢包率极高，SYN 握手包多次重发无果",
+      "机场对应的入口 IP 遭到 DDOS 攻击或当地机房正在维护",
+      "本地路由器的 MTU 设置过小或 MSS 协商异常"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在客户端切换不同的入口线路",
+        "detail": "选择标有不同入口（例如 广移、沪联、京德）的节点，避开当前发生故障的单点入口机房。"
+      },
+      {
+        "stepTitle": "步骤 2：排查本地宽带物理丢包",
+        "detail": "打开 CMD，运行 ping 223.5.5.5 -t，观察连续 20 个数据包是否有规律性丢包；若丢包严重，可尝试重启家用光猫重新分配公网 IP。"
+      }
+    ],
+    "faqTips": "deadline exceeded 本质上就是建立连接超时，多属于中间网络运营商物理链路故障或入口机房受攻击。",
+    "relatedSlugs": [
+      "error-dial-tcp-timeout-10000ms",
+      "error-tls-handshake-timeout"
+    ]
+  },
+  {
+    "id": "faq-38",
+    "slug": "error-cipher-not-supported",
+    "title": "Shadowsocks 加密方式不被内核支持（如 chacha20 报错）处理",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "老旧机场使用已被弃用的旧加密方式或客户端内核不兼容导致节点无法加载的解决。",
+    "symptoms": [
+      "启动核心提示：cipher [xxx] is not supported",
+      "导入订阅后部分特定节点被标记为 invalid 并自动隐藏",
+      "连接时提示 unsupported encryption method"
+    ],
+    "rootCauses": [
+      "老旧的 Shadowsocks 流密码（如 chacha20、rc4-md5、aes-256-cfb）因不具备 AEAD 认证防篡改能力，已被现代 Mihomo/Xray 内核安全机制弃用",
+      "节点配置字段名称混淆拼写错误"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：切换为兼容老旧协议的专用内核",
+        "detail": "在客户端内核管理中临时切换为 Clash 原生兼容核心，或者使用 v2rayN 作为应急过渡。"
+      },
+      {
+        "stepTitle": "步骤 2：建议升级更换采用现代 AEAD 协议的优质机场",
+        "detail": "现代主流机场已全面采用 aes-256-gcm、2022-blake3-aes-128-gcm 或 Vless-Reality 等全新安全协议，彻底淘汰了不安全的明文流密码。"
+      }
+    ],
+    "faqTips": "坚持使用已被破译特征的旧加密方式不仅连接极不稳定，更容易被防火墙针对性识别断流。",
+    "relatedSlugs": [
+      "shadowsocks-vs-trojan-vs-vless",
+      "shadowsocks-2022-specification-upgrade"
+    ]
+  },
+  {
+    "id": "faq-39",
+    "slug": "error-udp-nat-symmetric-restricted",
+    "title": "节点 UDP 变 Restricted 导致外服联机打游戏卡死的排错对策",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "主机与 PC 玩家使用代理加速外服游戏时，NAT 类型显示为严格或对称型导致搜不到房间的排查指南。",
+    "symptoms": [
+      "Switch 或 PS5 网络测试显示 NAT 类型为 NAT-D / NAT-F 或 严格 (Strict)",
+      "Apex Legends、使命召唤或怪物猎人联机经常掉线、无法加入好友队伍",
+      "游戏中开启麦克风语音聊天没有任何声音"
+    ],
+    "rootCauses": [
+      "所选机场节点本身未开启 Full Cone NAT 支持，或其服务端禁用了 UDP 流量转发",
+      "客户端开启了系统代理，但游戏流量直接走底层的原始 Socket 无法被 HTTP 代理截获"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：使用客户端自带的 NAT 类型检测工具筛选节点",
+        "detail": "在节点列表中挑选标有「游戏专线」、「Full Cone」或「游戏加速」的节点，这些节点通常配置了独立公网出口与 Cone NAT 支持。"
+      },
+      {
+        "stepTitle": "步骤 2：必须在客户端开启「TUN 模式」",
+        "detail": "普通系统代理只支持 TCP 网页流量，游戏联机必须在 Clash Verge Rev 中开启「TUN 模式」，接管完整的 UDP 握手数据包。"
+      }
+    ],
+    "faqTips": "对游戏联机有高要求的玩家，强烈建议使用灵动云等带有极低延迟香港/日本游戏物理专线的节点。",
+    "relatedSlugs": [
+      "full-cone-nat-type-for-gaming",
+      "lan-share-proxy-switch-ps5-xbox"
+    ]
+  },
+  {
+    "id": "faq-40",
+    "slug": "error-remote-host-closed-connection",
+    "title": "远程服务器主动关闭连接排错与节点被阻断状态诊断",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "客户端频繁提示 remote host closed connection 导致下载与播放频繁卡死的分析与解决。",
+    "symptoms": [
+      "正在浏览网页突然提示连接已由远程主机关闭",
+      "测速软件刚跑到峰值瞬间掉零",
+      "客户端日志提示 connection reset by foreign host"
+    ],
+    "rootCauses": [
+      "目标海外服务器的防火墙检测到来自该机场出口 IP 的并发连接数异常（例如短时间内数百个并发爬虫），触发了限频防御",
+      "中间防火墙检测到了异常阻断特征，在半路上阻断了 TCP 握手"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：更换机场的其他国家或冷门备用节点",
+        "detail": "香港和美西的 01 号热门节点往往聚集了海量用户，容易触发海外服务器风控；改选日本 02 或新加坡节点体验通常更好。"
+      },
+      {
+        "stepTitle": "步骤 2：调低本地下载软件的最大并发线程数",
+        "detail": "使用 IDM 或多线程下载工具时，将线程数从 32 调低至 8，避免被海外服务端防刷系统误判封锁。"
+      }
+    ],
+    "faqTips": "避开人满为患的第一位主力节点是每个科学上网老玩家的日常经验秘诀。",
+    "relatedSlugs": [
+      "error-connection-reset-by-peer",
+      "error-eof-proxy-closed"
+    ]
+  },
+  {
+    "id": "faq-41",
+    "slug": "error-too-many-open-files-ulimit",
+    "title": "高并发下载时报错「too many open files」系统句柄上限解决",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "在 macOS / Linux 桌面或软路由上高并发跑外网下载时，Clash 核心崩溃或提示文件描述符超限的解决。",
+    "symptoms": [
+      "打开多个网页或使用下载工具时，Clash 突然停止响应",
+      "终端控制台报错：socket: too many open files",
+      "新的网络请求全部被挂起无法建立连接"
+    ],
+    "rootCauses": [
+      "macOS 或 Linux 系统默认的单个进程允许打开的文件描述符 (ulimit -n) 限制较低（通常为 256 或 1024），在高并发代理下迅速耗尽"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在终端临时调高当前环境的 ulimit 上限",
+        "detail": "运行 ulimit -n 65535 将文件句柄上限放大到 65535。",
+        "code": "ulimit -n 65535"
+      },
+      {
+        "stepTitle": "步骤 2：永久修改系统配置文件",
+        "detail": "在 /etc/security/limits.conf 文件中追加 soft nofile 65535 和 hard nofile 65535 永久生效。"
+      }
+    ],
+    "faqTips": "Windows 系统的句柄管理机制不同，通常极少遇到该报错，该问题多发生在 macOS 开发者或 Linux/软路由用户身上。",
+    "relatedSlugs": [
+      "openwrt-openclash-double-routing-crash",
+      "linux-desktop-system-wide-proxy-clash"
+    ]
+  },
+  {
+    "id": "faq-42",
+    "slug": "error-sni-mismatch-tls",
+    "title": "TLS SNI 与伪装域名不一致导致握手被拒绝排查",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "分析节点配置中的 SNI (Server Name Indication) 字段与真实证书证书名不符导致的连接阻断。",
+    "symptoms": [
+      "提示 tls: bad certificate 或 remote certificate is invalid for given name",
+      "修改了订阅中的节点名称后无法连通",
+      "自建节点或手动修改配置后无法上网"
+    ],
+    "rootCauses": [
+      "客户端发送的 Client Hello 中的 SNI 扩展名与服务端 Nginx 绑定的 SSL 证书 Common Name 不匹配"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：更新官方原生订阅，勿手动修改 sni 属性",
+        "detail": "直接拉取机场后台的原始配置，不要擅自修改 node-options 中的 sni 或 servername 字段。"
+      },
+      {
+        "stepTitle": "步骤 2：开启 skip-cert-verify 作为临时排查验证",
+        "detail": "临时开启 skip-cert-verify: true 验证是否确由证书域名校验引起。"
+      }
+    ],
+    "faqTips": "正确的 SNI 是现代 TLS 伪装能在大流量特征审查下安全存活的关键所在。",
+    "relatedSlugs": [
+      "error-tls-handshake-timeout",
+      "vless-reality-anti-censorship-how-it-works"
+    ]
+  },
+  {
+    "id": "faq-43",
+    "slug": "error-proxy-authentication-required-407",
+    "title": "提示 HTTP 407 Proxy Authentication Required 认证失败解决",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "浏览器打开外网网页弹出登录窗口要求输入代理用户名密码，或报 407 错误的处理全解。",
+    "symptoms": [
+      "浏览器弹出弹窗：「代理服务器需要用户名和密码」",
+      "网页提示 HTTP Error 407: Proxy Authentication Required",
+      "无法跳过登录窗口直接上网"
+    ],
+    "rootCauses": [
+      "本地客户端开启了混合端口认证功能，并设置了自定义的账号密码",
+      "局域网内部署了企业级上网行为审计代理，强行插入了二次认证"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在 Clash 设置中清空或重置混合端口认证",
+        "detail": "进入 Clash Verge Rev 设置 ->「代理设置」，检查「认证 (Authentication)」项是否填写了内容，将其清空并保存即可免密使用。"
+      },
+      {
+        "stepTitle": "步骤 2：检查系统环境变量中的 http_proxy",
+        "detail": "检查环境变量中是否残留了带有旧账密的代理变量（如 http://user:pass@127.0.0.1:7890），将其修正或删除。"
+      }
+    ],
+    "faqTips": "个人电脑使用本地代理完全不需要设置认证，保持默认的无密码模式体验最顺畅。",
+    "relatedSlugs": [
+      "clash-verge-mixed-port-conflict",
+      "curl-wget-terminal-proxy-environment"
+    ]
+  },
+  {
+    "id": "faq-44",
+    "slug": "error-trojan-password-hash-mismatch",
+    "title": "Trojan 密码哈希不匹配或 TLS ALPN 协商失败排查",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "针对 Trojan 协议节点连接时提示 password authentication failed 或 ALPN 握手失败的对策。",
+    "symptoms": [
+      "客户端日志显示：[Trojan] authenticate failed: invalid password hash",
+      "Trojan 节点延迟测速正常，但实际收发流量均为 0",
+      "TLS 握手阶段提示 no application protocol negotiated"
+    ],
+    "rootCauses": [
+      "密码字符串中包含未正确转义的特殊符号，导致计算 SHA224 哈希值出现偏差",
+      "客户端 ALPN 配置强制指定为 h2，而服务端仅配置了 http/1.1 支持"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：直接通过订阅链接全量导入，切勿手工抄写密码",
+        "detail": "Trojan 采用 SHA224 算法将密码转为 56 位十六进制摘要，手动复制极易遗漏字符，务必使用机场一键订阅导入。"
+      },
+      {
+        "stepTitle": "步骤 2：在节点配置中允许默认 ALPN 协商",
+        "detail": "配置中的 alpn 字段建议同时包含 [\"h2\", \"http/1.1\"]，让客户端与服务端自适应协商最快协议。"
+      }
+    ],
+    "faqTips": "Trojan 协议对标准 HTTPS 模拟非常逼真，配置严谨度极高，必须严格对齐服务端参数。",
+    "relatedSlugs": [
+      "shadowsocks-vs-trojan-vs-vless",
+      "error-tls-handshake-timeout"
+    ]
+  },
+  {
+    "id": "faq-45",
+    "slug": "error-clock-skew-system-time",
+    "title": "系统时间与网络时间误差超过 90 秒导致 VMess 彻底断连深度剖析",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "详解为什么电脑或手机时间不准会导致科学上网全军覆没的底层安全密码学机制与秒级自愈。",
+    "symptoms": [
+      "明明网络正常、订阅也是最新购买的，所有 VMess 节点连上全部超时打不开网页",
+      "日志显示：Invalid user request / timestamp expired",
+      "修改完主板电池或跨时区后突然所有节点断网"
+    ],
+    "rootCauses": [
+      "VMess 协议为了抵御重放攻击 (Replay Attack)，在客户端与服务端之间严格强制校验动态时间戳。协议规定：若双方时间误差绝对值超过 90 秒，服务器将直接静默丢弃所有认证包，视同伪造黑客攻击！"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在系统设置中启用「自动设置时间」并立即同步",
+        "detail": "无论是 Windows、macOS 还是手机，必须在系统设置中将「自动设置时间」开启，并点击「立即同步」。",
+        "code": "# Windows PowerShell 管理员强制同步时间命令\nw32tm /resync"
+      },
+      {
+        "stepTitle": "步骤 2：切换为对时间无死板要求的 Vless-Reality 或 Hysteria 2 协议",
+        "detail": "新一代协议已经淘汰了脆弱的时间戳强校验机制，改用现代非对称加密证书握手，对时间轻微误差更加包容稳定。"
+      }
+    ],
+    "faqTips": "记住这个黄金铁律：只要发现全部节点突然毫无征兆一起超时，90% 都是系统时间偏差导致的，对时后瞬间满血复活！",
+    "relatedSlugs": [
+      "error-tls-handshake-timeout",
+      "error-dial-tcp-timeout-10000ms"
+    ]
+  },
+  {
+    "id": "faq-46",
+    "slug": "error-routing-loop-detected",
+    "title": "Clash 日志提示「routing loop detected」死循环回环阻断排错",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "开启 TUN 模式或自建网关时流量陷入死循环自我回环导致机器直接断网的处理。",
+    "symptoms": [
+      "日志疯狂刷屏：routing loop detected, packet dropped",
+      "开启 TUN 瞬间整机断网，CPU 占用率飙升到 100%",
+      "客户端频繁弹窗提示核心已紧急停止"
+    ],
+    "rootCauses": [
+      "TUN 模式将整机默认网关重定向到了 Clash 虚拟网卡，而发往机场服务器节点的出站流量本身未被排除在 TUN 之外，导致节点通信流量又被捕获进了 TUN，形成无限套娃死循环！"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在 TUN 配置中正确开启 auto-route 与严格路由",
+        "detail": "使用 Mihomo 官方推荐的 TUN 标准配置，内核会自动将机场服务器 IP 加入系统物理网卡的直连旁路名单中。"
+      },
+      {
+        "stepTitle": "步骤 2：检查自定义规则是否将代理服务器本身指向了 PROXY",
+        "detail": "检查 rules 规则，确保没有把机场节点的域名或 IP 错误地写成走 PROXY 策略，节点域名必须直连。"
+      }
+    ],
+    "faqTips": "TUN 模式通过虚拟网卡接管底层，配置路由表时切忌手动胡乱修改系统默认网关跃点数。",
+    "relatedSlugs": [
+      "clash-tun-mode-virtual-nic-fail",
+      "openwrt-openclash-double-routing-crash"
+    ]
+  },
+  {
+    "id": "faq-47",
+    "slug": "error-stun-test-failed",
+    "title": "STUN 测试失败导致无法穿透 P2P 与海外语音通话掉线排错",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "针对使用 Discord、Telegram 语音或打外服游戏时频繁掉线、STUN 测试超时的应对方案。",
+    "symptoms": [
+      "Discord 语音频道一直显示「RTC Connecting」或「No Route」进不去频道",
+      "P2P 联机游戏无法穿透好友房主内网",
+      "STUN 测试客户端报告 NAT Mapping Failure"
+    ],
+    "rootCauses": [
+      "节点禁用了 UDP 或者经过了多层对称式 NAT 转化，阻断了 STUN 探测响应",
+      "分流规则中未将 Discord 的语音媒体服务器网段加入代理策略"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：开启 Clash 的 UDP 转发总开关",
+        "detail": "在客户端配置的对应节点属性中，确保 udp: true 处于开启状态。"
+      },
+      {
+        "stepTitle": "步骤 2：在分流规则中添加专门的 Discord 与 WebRTC 规则",
+        "detail": "确保使用的分流规则库包含最新的 Discord 与 Google STUN (stun.l.google.com) 专用规则。"
+      }
+    ],
+    "faqTips": "对于语音开黑玩家，建议优先选用具备 Full Cone NAT 属性的高端专线节点以获得最流畅通话体验。",
+    "relatedSlugs": [
+      "error-udp-nat-symmetric-restricted",
+      "full-cone-nat-type-for-gaming"
+    ]
+  },
+  {
+    "id": "faq-48",
+    "slug": "error-mtu-packet-fragmentation",
+    "title": "MTU 过大引起分片丢包导致的网页加载白屏与排查指南",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "解决特定网络环境下网页只能加载前半部分、上传附件中断的 MTU 路径最大传输单元适配问题。",
+    "symptoms": [
+      "微信能发文字但发不出图片",
+      "访问轻量级文字页面很快，一旦访问大图片网页就无限加载甚至白屏",
+      "网络测速上传几乎为 0"
+    ],
+    "rootCauses": [
+      "物理宽带是 PPPoE 拨号（基础 MTU 为 1492），代理协议再包裹一层 50~100 字节的隧道包头后，总报文超过 1500 字节，在途中被不可分片标志 (DF) 路由器直接丢弃！"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：使用 ping 测试找到本地无丢包的最大 MTU",
+        "detail": "在 CMD 中执行 ping -f -l 1400 www.baidu.com，如果提示需要拆分，则逐步调小数字，直到不提示拆分且不丢包为止。",
+        "code": "ping -f -l 1400 www.baidu.com"
+      },
+      {
+        "stepTitle": "步骤 2：在客户端 TUN 设置中将 MTU 调整为安全值 1360~1400",
+        "detail": "在 Clash 或 Sing-box 的 TUN 配置中指定 mtu: 1380，彻底消除链路分片丢包现象。"
+      }
+    ],
+    "faqTips": "适当降低 MTU 虽然会牺牲微小的报文有效载荷比例，但换来的是极端复杂的公网链路下绝不卡死、永不断流的稳定性。",
+    "relatedSlugs": [
+      "sing-box-inbound-tun-mtu",
+      "error-tls-handshake-timeout"
+    ]
+  },
+  {
+    "id": "faq-49",
+    "slug": "error-tcp-rst-injection-gfw",
+    "title": "遇到 GFW TCP RST 报文注入伪装阻断的深度识别与规避方案",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "揭秘国家防火墙旁路监听机制如何通过伪造 TCP RST 重置包实施阻断，以及专线如何实现物理免疫。",
+    "symptoms": [
+      "访问特定未被完全封 IP 的海外网站，初次连接正常，浏览 2 秒后突然中断",
+      "Wireshark 抓包可以看到连续收到多个 TTL 跳数异常的 RST 标志数据包",
+      "随后目标网站在接下来的几分钟内完全不可访问"
+    ],
+    "rootCauses": [
+      "公网光纤经过 GFW 旁路监听设备时，检测到了未加密的 HTTP 敏感词或明文 TLS SNI，GFW 会迅速向通信两端伪造发送 TCP RST 报文，强行掐断正在建立的连接"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：全量流量必须在离开本地电脑前完成高强度加密",
+        "detail": "确保客户端规则分流完善，凡是海外未备案网站一律走代理节点出境，本地发出的每一个数据包都处于 Shadowsocks/Trojan 的强加密保护之下。"
+      },
+      {
+        "stepTitle": "步骤 2：选用 IPLC/IEPL 国际专线从物理层规避",
+        "detail": "IPLC/IEPL 走的是国内运营商向香港/日本铺设的物理内网专线光纤，在物理链路上根本不接入 GFW 审查机房，从源头彻底消除了 RST 注入风险。"
+      }
+    ],
+    "faqTips": "直连翻墙在当今环境下几乎是百分之百会被 RST 注入阻断的，规范的专线架构是长期稳定翻墙的唯一解。",
+    "relatedSlugs": [
+      "error-connection-reset-by-peer",
+      "iplc-vs-iepl-technical-difference"
+    ]
+  },
+  {
+    "id": "faq-50",
+    "slug": "error-quic-blocked-fallback-tcp",
+    "title": "浏览器 QUIC (HTTP/3) 协议被阻断导致网页卡死终极优化",
+    "category": "connection",
+    "categoryLabel": "网络连接报错",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "解决 Chrome / Edge 访问 YouTube 或 Google 默认使用 QUIC (UDP 443) 遭遇运营商阻断卡顿的问题。",
+    "symptoms": [
+      "Chrome 访问 YouTube 首页加载速度极慢，但一旦刷新几次换成普通 TCP 又变快",
+      "控制台网络面板显示协议为 h3 或 quic 时速度极慢",
+      "视频经常在刚播放 5 秒后严重卡顿"
+    ],
+    "rootCauses": [
+      "Google 大量服务默认启用基于 UDP 的 HTTP/3 (QUIC) 协议，而国内运营商对境外 443 端口 UDP 流量进行无差别限速或丢包"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在 Chrome / Edge 浏览器中直接禁用 QUIC 协议",
+        "detail": "在浏览器地址栏输入 chrome://flags，搜索 Experimental QUIC protocol，将其从 Default 改为「Disabled」，重启浏览器强制回退到极速的 TCP TLS 1.3 链路。"
+      },
+      {
+        "stepTitle": "步骤 2：在 Clash 分流规则中丢弃 443 端口 UDP 流量",
+        "detail": "在规则列表中添加 REJECT 规则：AND,((DST-PORT,443),(NETWORK,UDP)),REJECT，强制所有客户端自动回退到流畅的 TCP 通道。"
+      }
+    ],
+    "faqTips": "禁用 QUIC 几乎不会影响视频画质，反而能彻底解决 UDP 劣化带来的初期缓冲假死现象。",
+    "relatedSlugs": [
+      "error-hysteria2-udp-rate-limit",
+      "error-udp-nat-symmetric-restricted"
+    ]
+  },
+  {
+    "id": "faq-51",
+    "slug": "chatgpt-access-denied-error-1020",
+    "title": "OpenAI / ChatGPT 提示「Access Denied Error 1020」彻底解决指南",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "访问 chatgpt.com 时遭遇 Cloudflare 弹窗阻断、提示 Error 1020 访问被拒的最全破局方案。",
+    "symptoms": [
+      "打开 ChatGPT 官网瞬间跳出 Cloudflare 拦截页面，大字显示「Access Denied, Error code 1020」",
+      "换了几个节点依然提示无法访问",
+      "清除浏览器缓存后依然被拦截"
+    ],
+    "rootCauses": [
+      "当前机场节点的出口 IP 属于廉价机房托管 IP (DataCenter IP)，触发了 Cloudflare 防火墙的高危风控规则",
+      "该 IP 在短时间内有大量用户并发访问 OpenAI，被官方标记为滥用并列入临时黑名单",
+      "浏览器语言或系统时区被探测为中国大陆（Asia/Shanghai）但出口 IP 在境外产生关联风控"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：必须切换为具有原生住宅/家宽 IP 出口的节点",
+        "detail": "在节点列表中挑选标有「原生 IP」、「AI 解锁」或「家宽」的节点（如隐形人或飞猫云的专属 AI 节点）。原生家宽出口被 Cloudflare 视为正常家庭宽带用户，信誉极高，瞬间通过。"
+      },
+      {
+        "stepTitle": "步骤 2：彻底清除 chatgpt.com 的本地 Cookie 与 LocalStorage",
+        "detail": "按 F12 打开开发者工具 ->「应用程序 (Application)」->「存储 (Storage)」-> 点击「清除网站数据」，随后使用无痕窗口重新打开。"
+      },
+      {
+        "stepTitle": "步骤 3：关闭浏览器内置的 WebRTC 真实 IP 泄漏",
+        "detail": "安装 uBlock Origin 或 WebRTC Control 扩展插件，禁用浏览器底层的 WebRTC 局域网探测，杜绝真实 IP 暴露。"
+      }
+    ],
+    "faqTips": "尽量固定使用同一个优质专线节点登录 ChatGPT，频繁跨国家（刚在香港下一秒切到美国）是触发 OpenAI 封号的主要原因之一。",
+    "relatedSlugs": [
+      "chatgpt-unable-to-load-site",
+      "claude-app-unavailable-in-your-region"
+    ]
+  },
+  {
+    "id": "faq-52",
+    "slug": "chatgpt-unable-to-load-site",
+    "title": "ChatGPT 登录页面提示「Unable to load site」一直转圈排查",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "点击 Log in 登录按钮后页面无限 loading、弹窗 Unable to load site 的排错方案。",
+    "symptoms": [
+      "输入账号密码后页面一直旋转菊花，长达几分钟没有反应",
+      "弹窗提示：Unable to load site. Please try again later.",
+      "控制台报错 403 Forbidden 或 CORS policy 跨域阻断"
+    ],
+    "rootCauses": [
+      "分流规则中只将 chatgpt.com 走代理，而 auth0.openai.com 或 tcr9i.chat.openai.com 登录鉴权子域名被漏掉走了国内直连",
+      "浏览器广告拦截插件（如 AdGuard）强行拦截了 OpenAI 的 Arkose 人机验证脚本"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：确保分流规则完整覆盖 OpenAI 全套域名",
+        "detail": "在客户端规则集中确保包含 GEOSITE:openai 规则组，覆盖包括 auth0、challenges.cloudflare.com 在内的所有鉴权域名。"
+      },
+      {
+        "stepTitle": "步骤 2：临时禁用浏览器广告拦截扩展",
+        "detail": "将 chatgpt.com 添加到广告拦截插件的白名单中，确保人机验证模块能正常加载完成。"
+      }
+    ],
+    "faqTips": "如果在 Chrome 下遇到转圈，尝试使用 Edge 浏览器或开启无痕模式往往能快速跳出死循环。",
+    "relatedSlugs": [
+      "chatgpt-access-denied-error-1020",
+      "chatgpt-mobile-app-login-loop"
+    ]
+  },
+  {
+    "id": "faq-53",
+    "slug": "claude-app-unavailable-in-your-region",
+    "title": "Claude 3.5 提示「App unavailable in your region」终极绕过方案",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "Anthropic 旗下 Claude 对地区与节点风控极为严苛，提示区域不可用或账号被封的避坑实战。",
+    "symptoms": [
+      "访问 claude.ai 提示「App unavailable in your region」",
+      "刚注册完账号几分钟内就被强行封禁 (Account suspended)",
+      "输入手机号验证时提示当前国家暂不支持"
+    ],
+    "rootCauses": [
+      "使用了香港、俄罗斯等 Anthropic 明确不支持国家地区的节点访问",
+      "节点 IP 虽然位于美国，但在 IP2Location 或 MaxMind 数据库中被标记为滥用机房 IP",
+      "系统时区与语言设置与代理 IP 物理地理位置严重冲突"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：严禁使用任何香港或澳门节点访问 Claude",
+        "detail": "Claude 官方对香港 IP 全面阻断。必须选用正规「美国 (US)」、「日本 (JP)」或「英国 (UK)」的纯物理专线节点。"
+      },
+      {
+        "stepTitle": "步骤 2：修改浏览器系统时区为所选节点时区",
+        "detail": "若选用美西节点，将电脑时区临时改为 (UTC-08:00) 太平洋时间，语言首选英文，可极大降低被 Anthropic 风控模型标记的概率。"
+      },
+      {
+        "stepTitle": "步骤 3：选用经过 Claude 原生解锁认证的优质机场",
+        "detail": "选用隐形人、大佬云等专门针对 Claude 3.5 部署了纯净住宅出口的机场，从根本上解决地区阻断问题。"
+      }
+    ],
+    "faqTips": "Claude 的风控等级显著高于 ChatGPT，强烈建议不要频繁切换节点，保持一个固定的高质量美区专线访问最安全。",
+    "relatedSlugs": [
+      "chatgpt-access-denied-error-1020",
+      "gemini-advanced-country-not-supported"
+    ]
+  },
+  {
+    "id": "faq-54",
+    "slug": "chatgpt-mobile-app-login-loop",
+    "title": "iOS / Android 官方 ChatGPT App 登录死循环与短信验证失败对策",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "解决在 iPhone 或安卓手机打开官方 ChatGPT App 提示 Something went wrong 无法登录的排错。",
+    "symptoms": [
+      "点击「Continue with Apple」或「Continue with Google」后页面直接退回初始界面",
+      "提示：Something went wrong. Please check your connection and try again.",
+      "短信验证码环节无法发送或收不到短信"
+    ],
+    "rootCauses": [
+      "手机客户端只开了系统代理，未代理底层系统组件的 HTTPS 流量",
+      "iOS 设备的「语言与地区」设置为中国大陆，被 App 内部的系统 API 探测识别",
+      "安卓系统缺少 Google Play Services 基础套件"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在 iPhone 设置中修改「地区」为美国",
+        "detail": "打开 iPhone「设置」->「通用」->「语言与地区」-> 将「地区」改为「美国」，日历改为公历，随后重启手机。"
+      },
+      {
+        "stepTitle": "步骤 2：在小火箭中开启全局代理排查",
+        "detail": "初次登录时，在小火箭中临时将全局路由从「配置/规则」改为「代理 (Proxy)」，确保 App 初始化探测流量完全走境外通道。"
+      }
+    ],
+    "faqTips": "登录成功进入聊天界面后，即可将分流模式切回「配置/规则」模式以节省流量。",
+    "relatedSlugs": [
+      "chatgpt-access-denied-error-1020",
+      "apple-id-foreign-region-change"
+    ]
+  },
+  {
+    "id": "faq-55",
+    "slug": "gemini-advanced-country-not-supported",
+    "title": "Google Gemini 提示「Gemini is not supported in this country」应对方案",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "使用 Google Gemini (前 Bard) 遇到地区受限、无法使用高级版 Gemini Advanced 的解决办法。",
+    "symptoms": [
+      "访问 gemini.google.com 弹出灰色提示：Gemini is not supported in your country yet.",
+      "登录 Google 账号后无法开启 Gemini 对话界面"
+    ],
+    "rootCauses": [
+      "节点所在地被判定为不支持的欧盟部分受限制法案地区、或者香港/国内 IP",
+      "Google 账号本身的归属地被判定在中国大陆"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：更换为纯正美国 (US) 或日本 (JP) 节点",
+        "detail": "Google 官方对自有服务拥有极强的 IP 识别能力，确保节点使用的是纯净无污染的美日出海线路。"
+      },
+      {
+        "stepTitle": "步骤 2：在 Google 账号设置中修改首选语言为 English (US)",
+        "detail": "进入 myaccount.google.com ->「个人信息」->「常规网页偏好设置」-> 语言，添加英语为首选语言。"
+      }
+    ],
+    "faqTips": "Gemini 现已整合入 Google Workspace，配合美区谷歌账号使用体验最为完善。",
+    "relatedSlugs": [
+      "claude-app-unavailable-in-your-region",
+      "chatgpt-access-denied-error-1020"
+    ]
+  },
+  {
+    "id": "faq-56",
+    "slug": "poe-ai-vpn-detected-block",
+    "title": "Poe AI 提示 VPN 检测阻断与低风控节点推荐方案",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "在 Quora 旗下 Poe AI 平台与多种机器人对话时频繁提示 VPN 代理异常的对策。",
+    "symptoms": [
+      "提问后机器人显示抱歉当前网络环境异常",
+      "提示：We have detected unusual activity from your IP address",
+      "手机客户端无法加载机器人列表"
+    ],
+    "rootCauses": [
+      "Poe 对公共数据中心 IP 进行了频率限制，单个 IP 每小时请求超过阈值后自动限流"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：切换为小众冷门节点",
+        "detail": "避开拥挤的热门美西 1 号机房，切换至新加坡或台湾专线节点，降低单 IP 聚合并发。"
+      },
+      {
+        "stepTitle": "步骤 2：使用第三方客户端或 API 接入",
+        "detail": "如果网页端受限，可尝试使用其官方 iOS/Android App，App 端的风控判定通常稍宽松。"
+      }
+    ],
+    "faqTips": "Poe 集成了多种主流模型，适合不想单独折腾每个账号的轻度体验用户。",
+    "relatedSlugs": [
+      "chatgpt-access-denied-error-1020",
+      "perplexity-ai-cloudflare-challenge"
+    ]
+  },
+  {
+    "id": "faq-57",
+    "slug": "midjourney-discord-captcha-loop",
+    "title": "使用 Midjourney 遇到 Discord 人机验证 (hCaptcha) 死循环解决",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "在 Discord 中使用 /imagine 生成图片时，每次都强制弹窗让你点红绿灯且无限死循环的排查。",
+    "symptoms": [
+      "发送提示词后，Discord 弹窗要求进行 hCaptcha 验证码验证",
+      "好不容易点完 9 张图片，点击确认又立即刷新出下一套，永远无法通过",
+      "控制台网络提示 captcha token invalid"
+    ],
+    "rootCauses": [
+      "节点 IP 被 Cloudflare / hCaptcha 评分为高危爬虫 IP，信誉分过低",
+      "浏览器指纹（Canvas / WebGL）被篡改导致防刷机制判定为自动化脚本"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：更换纯净度更高的专线节点",
+        "detail": "切换到信誉评分优秀的住宅 IP 节点，高信誉 IP 通常可以直接免跳验证码或者一键勾选秒过。"
+      },
+      {
+        "stepTitle": "步骤 2：登录 Discord 桌面官方独立客户端",
+        "detail": "相比网页版，Discord 官方桌面安装包自带完整环境签名，极少频繁触发人机验证死循环。"
+      }
+    ],
+    "faqTips": "如果必须在网页操作，建议登录一个常用的 Google 账号，其浏览行为历史有助于提高验证通过率。",
+    "relatedSlugs": [
+      "google-scholar-unusual-traffic-robot",
+      "perplexity-ai-cloudflare-challenge"
+    ]
+  },
+  {
+    "id": "faq-58",
+    "slug": "github-copilot-proxy-wsl-ide",
+    "title": "VS Code / Cursor 中 GitHub Copilot 无法联网的代理配置技巧",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "解决程序员在 VS Code、Cursor 或 WSL 环境下使用 GitHub Copilot 报错无法连接鉴权服务器的问题。",
+    "symptoms": [
+      "VS Code 状态栏右下角的 Copilot 小图标出现斜杠或红色感叹号",
+      "输出面板提示：GitHub Copilot could not connect to server. Error: getaddrinfo ENOTFOUND",
+      "在代码中无法实时补全代码，触发内联代码无反应"
+    ],
+    "rootCauses": [
+      "VS Code 内部的 Node.js 运行时未继承 Windows 系统的 PAC/HTTP 代理设置",
+      "Clash 规则分流未将 githubcopilot.com 与 api.github.com 划入 PROXY 组"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在 VS Code 设置中显式配置 HTTP 代理",
+        "detail": "按 Ctrl + , 打开设置，搜索 http.proxy，填入你的本地代理端口 http://127.0.0.1:7890，并将 http.proxySupport 设置为 on。",
+        "code": "{\n  \"http.proxy\": \"http://127.0.0.1:7890\",\n  \"http.proxySupport\": \"on\",\n  \"http.proxyStrictSSL\": false\n}"
+      },
+      {
+        "stepTitle": "步骤 2：推荐开启 Clash Verge 的 TUN 模式",
+        "detail": "开启 TUN 模式后，虚拟网卡在网络层接管所有进出流量，无需在每个开发工具（VSCode/Git/Docker）中单独配代理，彻底省心。"
+      }
+    ],
+    "faqTips": "国内直连访问 GitHub API 极不稳定，强烈建议为开发工具配置固定的专线加速通道以保障编写效率。",
+    "relatedSlugs": [
+      "cursor-ide-ai-network-error",
+      "git-clone-github-ssh-proxy-config"
+    ]
+  },
+  {
+    "id": "faq-59",
+    "slug": "twitter-x-sensitive-content-sms",
+    "title": "Twitter / X 手机短信验证码接收不到与敏感内容无法开启全解",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "解决国内用户登录推特 (X) 无法收到 +86 短信验证码，以及设置中无法勾选「显示可能包含敏感内容的媒体」的方案。",
+    "symptoms": [
+      "输入中国大陆 +86 手机号请求验证码，提示发生错误或等了半小时没有任何短信",
+      "在 App 内浏览推文，很多图片显示被遮挡，提示「此媒体可能包含敏感内容」，点击无法解锁"
+    ],
+    "rootCauses": [
+      "国内运营商网关对来自 Twitter 国际通道的短信验证码实施了批量拦截与过滤",
+      "Twitter 网页版与移动端策略不同，移动端 App 内不允许直接修改敏感内容总开关"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：绑定海外虚拟邮箱或使用身份验证器 (2FA)",
+        "detail": "强烈建议使用 Google Authenticator 或 1Password 开启两步验证，彻底摆脱脆弱且易受阻断的短信验证码。"
+      },
+      {
+        "stepTitle": "步骤 2：必须使用电脑网页版修改敏感内容权限",
+        "detail": "在浏览器打开 x.com ->「More」->「Settings and privacy」->「Privacy and safety」->「Content you see」-> 勾选「Display media that may contain sensitive content」，随后重启手机 App 即可永久解锁所有内容。"
+      }
+    ],
+    "faqTips": "修改此项设置必须在电脑或手机浏览器打开桌面版网页修改，官方手机客户端内是找不到该勾选项的。",
+    "relatedSlugs": [
+      "telegram-connecting-updating-loop",
+      "reddit-blocked-vpn-datacenter"
+    ]
+  },
+  {
+    "id": "faq-60",
+    "slug": "telegram-connecting-updating-loop",
+    "title": "Telegram 桌面端一直显示「Connecting」或「Updating」修复全解",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "Telegram 电脑端打开后顶部一直转圈显示 Connecting、收不到新消息的排错与内置代理配置。",
+    "symptoms": [
+      "Telegram 桌面端左下角或顶部常年显示「Connecting...」，无法同步最近聊天记录",
+      "能打开 Google 网页，但是 TG 就是转圈连不上",
+      "大文件或视频预览下载极其缓慢"
+    ],
+    "rootCauses": [
+      "Telegram 默认采用自研的 MTProto 协议与固定的服务器 IP 建立 Socket 连接，默认不会自动读取 Windows 系统的 HTTP 代理设置",
+      "分流规则中未将 Telegram 专有数据中心网段 (ASN 44907 / 62041) 划入代理出站"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在 Telegram 设置中手动指定本地 SOCKS5 代理",
+        "detail": "打开 Telegram「Settings」->「Advanced」->「Connection type」-> 选择「Use custom proxy」-> 添加 SOCKS5 代理，Server 填 127.0.0.1，Port 填 7890（根据你的客户端端口填写）。",
+        "code": "Proxy Type: SOCKS5\nServer: 127.0.0.1\nPort: 7890 (或 Clash 混合端口)"
+      },
+      {
+        "stepTitle": "步骤 2：开启 Clash 的 TUN 模式（全局接管最推荐）",
+        "detail": "只要开启了 TUN 模式，Telegram 的底层 Socket 流量会被虚拟网卡自动拦截并转发，无需在 TG 软件内做任何繁琐配置。"
+      }
+    ],
+    "faqTips": "如果偶尔连上但收发图片很慢，建议在节点列表中挑选直连香港机房延迟低、带宽大的优质线路。",
+    "relatedSlugs": [
+      "clash-tun-mode-virtual-nic-fail",
+      "twitter-x-sensitive-content-sms"
+    ]
+  },
+  {
+    "id": "faq-61",
+    "slug": "google-scholar-unusual-traffic-robot",
+    "title": "Google 学术搜索频繁弹出「异常流量人机验证」终极排查",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "学术科研人员在查阅 Google Scholar 文献时，每搜一次就弹出一堆验证码让人抓狂的破解之道。",
+    "symptoms": [
+      "访问 scholar.google.com 弹出提示「我们的系统检测到您的计算机网络中存在异常流量」",
+      "完成一次验证后，换一个关键词再次搜索又立刻弹窗",
+      "无法批量导出 EndNote / BibTeX 引用文献"
+    ],
+    "rootCauses": [
+      "公用机场节点出口聚集了上百人同时在查询学术资料，且有人使用爬虫脚本高频爬取，导致整个节点 IP 被 Google 标记为高风控机器流量"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：切换到小众专线节点或冷门地区",
+        "detail": "避开默认的香港 01、美西 01 这种万人挤爆的节点，切换到英国、德国或新加坡等冷门专线节点，Google 学术的防御敏感度会大幅下降。"
+      },
+      {
+        "stepTitle": "步骤 2：选用纯净独立 IP 或商务专线",
+        "detail": "选用大佬云、跨界云等提供纯净商务出海通道的机场，这类线路用户密度低，绝无爬虫脚本污染，查文献畅快无阻。"
+      }
+    ],
+    "faqTips": "经常需要大批量导出文献的学者，务必备用一条纯净专线，避免在关键时刻耽误论文进度。",
+    "relatedSlugs": [
+      "chatgpt-access-denied-error-1020",
+      "midjourney-discord-captcha-loop"
+    ]
+  },
+  {
+    "id": "faq-62",
+    "slug": "openai-api-key-rate-limit-proxy",
+    "title": "开发调用 OpenAI API 报 429 或 403 代理网络配置最佳实践",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "开发者在 Python/Node.js 项目中调用 OpenAI 官方接口时避免 IP 封禁与网络超时的工程指引。",
+    "symptoms": [
+      "代码报错：openai.APIConnectionError: Connection error.",
+      "返回 HTTP 403 Forbidden 或 Country not supported",
+      "高并发调用时频繁遇到 429 Rate Limit"
+    ],
+    "rootCauses": [
+      "Python 请求库默认不走 Windows 系统代理",
+      "请求发出的出口 IP 处于受限国家地区，直接被 Cloudflare 拦截"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在代码中显式配置代理客户端",
+        "detail": "在初始化 OpenAI SDK 客户端时，显式传入 http_client 或环境变量，确保流量走稳定的香港/美日专线。",
+        "code": "import httpx\nfrom openai import OpenAI\n\nclient = OpenAI(\n    api_key=\"your-api-key\",\n    http_client=httpx.Client(\n        proxy=\"http://127.0.0.1:7890\"\n    )\n)"
+      },
+      {
+        "stepTitle": "步骤 2：使用可靠的海外反向代理中转加速",
+        "detail": "在生产环境中，推荐使用海外 VPS 搭建 API 反向代理或使用 Cloudflare Worker 中转 base_url，实现免本地代理直连调用。"
+      }
+    ],
+    "faqTips": "开发环境调试建议直接开启 TUN 模式，免去在每一段代码和测试脚本中硬编码代理地址的烦恼。",
+    "relatedSlugs": [
+      "pip-conda-npm-proxy-terminal",
+      "chatgpt-access-denied-error-1020"
+    ]
+  },
+  {
+    "id": "faq-63",
+    "slug": "perplexity-ai-cloudflare-challenge",
+    "title": "Perplexity AI 频繁卡在 Cloudflare 验证界面的破局方案",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "新一代 AI 搜索引擎 Perplexity 访问时一直停留在 Checking your browser 验证界面的解决指南。",
+    "symptoms": [
+      "页面显示「Just a moment...」并且勾选框打勾后又重新刷新，陷入无限死循环",
+      "提示：Verification failed, please try again",
+      "无法进入搜索框提问界面"
+    ],
+    "rootCauses": [
+      "Cloudflare Turnstile 人机验证模块通过分析网络往返延迟 (RTT) 与 TCP 握手特征，判定客户端环境异常"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：更换为带有 uTLS 伪装的专线节点",
+        "detail": "在客户端中启用 uTLS，将客户端握手特征伪装为最新版的 Google Chrome，提高指纹拟真度。"
+      },
+      {
+        "stepTitle": "步骤 2：尝试在手机 App 端使用",
+        "detail": "Perplexity 官方手机 App（iOS/Android）使用专属的 API 鉴权通道，比网页版更容易通过验证。"
+      }
+    ],
+    "faqTips": "使用纯净专线并配合常用登录浏览器，是解决所有 Cloudflare 拦截的终极法宝。",
+    "relatedSlugs": [
+      "chatgpt-access-denied-error-1020",
+      "midjourney-discord-captcha-loop"
+    ]
+  },
+  {
+    "id": "faq-64",
+    "slug": "cursor-ide-ai-network-error",
+    "title": "Cursor 代码编辑器 AI 无法连通与设置系统代理方法",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "爆火的 AI 编程神器 Cursor 无法生成代码、对话一直提示 Connection failed 的一键修复。",
+    "symptoms": [
+      "按 Ctrl + K 或 Ctrl + L 唤出 AI，生成一半突然报错：Connection failed / Network error",
+      "Index 索引代码库时进度条卡在 0% 无法建立连接",
+      "Cursor 设置中无法登录 GitHub 账号"
+    ],
+    "rootCauses": [
+      "Cursor 基于 VS Code 魔改，其后端的 AI 补全通信走的是独立的 gRPC / HTTP2 长连接通道，某些旧版代理工具无法处理长连接中断",
+      "分流规则未包含 cursor.sh 和 anysphere.co 等核心域名"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在 Clash 中添加 Cursor 专属分流规则",
+        "detail": "在配置文件自定义规则中追加：DOMAIN-SUFFIX,cursor.sh,PROXY 以及 DOMAIN-SUFFIX,anysphere.co,PROXY，确保全部走代理出站。"
+      },
+      {
+        "stepTitle": "步骤 2：开启 Clash Verge Rev 的 TUN 模式（最彻底）",
+        "detail": "Cursor 拥有大量后台子进程（cpp、python 语言服务器），开启 TUN 模式从虚拟网卡直接拦截转发，完美解决长连接中断问题。"
+      }
+    ],
+    "faqTips": "Cursor 重度用户推荐选用低延迟的香港或日本 IPLC 专线，代码生成的实时打字流式体验会极其丝滑。",
+    "relatedSlugs": [
+      "github-copilot-proxy-wsl-ide",
+      "clash-tun-mode-virtual-nic-fail"
+    ]
+  },
+  {
+    "id": "faq-65",
+    "slug": "huggingface-model-download-proxy",
+    "title": "国内下载 HuggingFace 模型慢或中断的命令行代理设置全攻略",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "AI 开发者在终端拉取几十 GB 的开源大模型权重文件时，频繁连接重置超时的终极方案。",
+    "symptoms": [
+      "huggingface-cli download 卡在 0% 或几百 KB/s 龟速下载",
+      "下载大文件（如 model.safetensors）几 GB 后报错 ConnectionResetError",
+      "transformers 库直接 load_model 报 HTTPSConnectionPool timeout"
+    ],
+    "rootCauses": [
+      "HuggingFace 模型托管于海外 AWS S3 大容量存储，国内直连受到高频丢包与严重限速",
+      "Python 的 requests 库默认不会自动读取系统代理设置"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在终端临时配置环境变量加速",
+        "detail": "在运行下载脚本前，在终端中设置全局代理环境变量并启用 hf-mirror 镜像源。",
+        "code": "# PowerShell\n$env:HF_ENDPOINT = \"https://hf-mirror.com\"\n$env:http_proxy = \"http://127.0.0.1:7890\"\n$env:https_proxy = \"http://127.0.0.1:7890\"\nhuggingface-cli download --resume-download meta-llama/Llama-2-7b"
+      },
+      {
+        "stepTitle": "步骤 2：搭配大带宽专线节点（如浪网/大佬云）",
+        "detail": "下载超大模型动辄几十上百 GB，建议在客户端中选择大带宽储备、不限并发线程的优质节点，跑满千兆带宽。"
+      }
+    ],
+    "faqTips": "使用 --resume-download 参数开启断点续传，即使中途网络微小波动也不会前功尽弃。",
+    "relatedSlugs": [
+      "pip-conda-npm-proxy-terminal",
+      "git-clone-github-ssh-proxy-config"
+    ]
+  },
+  {
+    "id": "faq-66",
+    "slug": "reddit-blocked-vpn-datacenter",
+    "title": "Reddit 屏蔽数据中心 IP 导致无法浏览或账号自动锁定解决",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "海外大论坛 Reddit 升级反爬虫策略后，使用代理访问提示「Blocked by network security」的对策。",
+    "symptoms": [
+      "打开 Reddit 网页提示：Blocked by network security (You have been blocked from accessing reddit.com)",
+      "手机 App 可以看列表，但无法点赞、无法发帖、提示 Sorry try again later",
+      "新注册的账号在没有任何违规的情况下直接被 shadowban（影子禁言）"
+    ],
+    "rootCauses": [
+      "Reddit 近期收紧了对大型公共云服务商（如 Linode、DigitalOcean、Vultr）出口 IP 的反抓取限制，将整个网段列入不可信名单"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：更换为原生家庭住宅 IP 节点",
+        "detail": "在客户端中切换带有「原生」、「家宽」标签的专线节点，绕过机房 IP 段黑名单检测。"
+      },
+      {
+        "stepTitle": "步骤 2：避免频繁无痕模式登录",
+        "detail": "在固定浏览器内保留正常的会话 Cookie，避免每次打开都作为全新的无头浏览器受到重点审查。"
+      }
+    ],
+    "faqTips": "高质量的原生家宽出口对于需要长期在 Reddit、Twitter 等海外社区养号的用户至关重要。",
+    "relatedSlugs": [
+      "chatgpt-access-denied-error-1020",
+      "twitter-x-sensitive-content-sms"
+    ]
+  },
+  {
+    "id": "faq-67",
+    "slug": "pixiv-bypass-dns-blocking",
+    "title": "Pixiv (P站) 国内直连阻断与客户端免翻墙 / 分流配置全流程",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "画师与二次元爱好者访问 Pixiv 插画网站时图片显示破损裂开、无法登录账号的配置技巧。",
+    "symptoms": [
+      "pixiv.net 网页能打开，但是图片缩略图全部裂开变成灰色小方块",
+      "客户端提示 10054 网络错误",
+      "即使开着代理，图片加载速度依然极慢"
+    ],
+    "rootCauses": [
+      "Pixiv 的图片静态资源存储在独立的 i.pximg.net 域名下，该 CDN 域名在国内受到了针对性的 SNI 污染和丢包阻断",
+      "某些分流规则库仅包含了主站 pixiv.net，遗漏了图片 CDN 域名"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：完善客户端的分流规则，确保图片 CDN 走代理",
+        "detail": "在自定义规则中添加：DOMAIN-SUFFIX,pximg.net,PROXY 以及 DOMAIN-SUFFIX,pixiv.net,PROXY，确保所有高清大图全部由境外专线高速拉取。"
+      },
+      {
+        "stepTitle": "步骤 2：选择日本原生节点以获得最佳加载速度",
+        "detail": "Pixiv 的服务器机房位于日本东京，选择日本专线节点（如沪日 IPLC）延迟通常低于 40ms，大图几乎瞬间秒开。"
+      }
+    ],
+    "faqTips": "如果使用第三方 Pixiv 客户端（如 Pixiv-Shaft），可在其设置中开启内置 DoH 域名解析。",
+    "relatedSlugs": [
+      "bilibili-taiwan-hk-unblock-rule",
+      "clash-verge-custom-rules-override"
+    ]
+  },
+  {
+    "id": "faq-68",
+    "slug": "bing-copilot-safesearch-locked",
+    "title": "微软 Copilot 强制重定向到国内必应及安全搜索锁定解除",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "打开微软 Copilot 自动跳转到 cn.bing.com、安全搜索被强制锁定为「严格」无法解锁的彻底修复。",
+    "symptoms": [
+      "访问 copilot.microsoft.com 页面右上角的 Copilot 聊天面板消失",
+      "网址被强制重定向为 cn.bing.com",
+      "提示：此功能在您的地区暂不可用"
+    ],
+    "rootCauses": [
+      "微软根据浏览器的地理位置定位、Cookie 中的地区代号 (cc=CN) 以及国内 DNS 强制执行了重定向"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在必应设置中修改国家和地区为美国",
+        "detail": "打开 bing.com -> 点击右上角汉堡菜单 ->「设置」->「国家/地区」-> 选择「美国 (当前英语)」，并在安全搜索中选择「中等」或「关闭」。"
+      },
+      {
+        "stepTitle": "步骤 2：在分流规则中将 bing 整体纳入 PROXY 组",
+        "detail": "规则添加：DOMAIN-SUFFIX,bing.com,PROXY，防止 DNS 查询返回国内 CDN IP 触发跳转。"
+      }
+    ],
+    "faqTips": "配合 Edge 浏览器自带的侧边栏使用 Copilot 时，建议在系统设置中将默认区域调整为非中国区。",
+    "relatedSlugs": [
+      "gemini-advanced-country-not-supported",
+      "chatgpt-access-denied-error-1020"
+    ]
+  },
+  {
+    "id": "faq-69",
+    "slug": "apple-id-foreign-region-change",
+    "title": "美区 / 日区 Apple ID 注册与绑定免税区地址防风控保姆级指南",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "6 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "苹果用户下载小火箭、ChatGPT 等海外 App 必须拥有的美区 Apple ID 注册要点与防封防退避坑法则。",
+    "symptoms": [
+      "在 App Store 搜索不到 Shadowrocket 或 ChatGPT 官方正版应用",
+      "注册美区账号提示无法完成创建，或购买礼品卡充值后账号被立即停用"
+    ],
+    "rootCauses": [
+      "使用了非纯净节点注册，被苹果风控识别为代理批量创建",
+      "填写的账单地址属于高税率州（如加州），导致扣费时产生额外税费且容易触发核验"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：使用美国免税州账单地址",
+        "detail": "在填写账单地址时，选择美国五大免税州之一（如俄勒冈州 Oregon、特拉华州 Delaware 或阿拉斯加州），邮编例如 97201，免除每次内购扣税。"
+      },
+      {
+        "stepTitle": "步骤 2：全程保持纯净美国专线节点连接",
+        "detail": "在苹果官网 appleid.apple.com 注册时，全程使用纯净美国 IP 访问，付款方式先选「None (无)」，成功后再通过正规渠道购买 App Store 美区礼品卡兑换。"
+      }
+    ],
+    "faqTips": "平时下载完软件后可以切回国区 ID，但千万不要在系统「设置」中登录外区 iCloud，只在「App Store」中登录下载应用最安全！",
+    "relatedSlugs": [
+      "shadowrocket-subscription-timeout",
+      "chatgpt-mobile-app-login-loop"
+    ]
+  },
+  {
+    "id": "faq-70",
+    "slug": "steam-community-error-101-118",
+    "title": "Steam 社区 / 个人资料 / 好友列表错误代码 101/118 快速修复与分流",
+    "category": "ai",
+    "categoryLabel": "AI与服务风控",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "解决电脑 Steam 客户端打开好友列表、创意工坊提示错误代码 -101、-118 的规则分流技巧。",
+    "symptoms": [
+      "点击 Steam 个人资料或社区创意工坊，黑屏并提示「错误代码：-101 / -118 无法载入网页」",
+      "好友列表无法连接网络，一直处于离线状态",
+      "游戏本身能玩，唯独社区网页打不开"
+    ],
+    "rootCauses": [
+      "Steam 社区域名 (steamcommunity.com) 在国内遭到严密的 DNS 污染与 HTTPS SNI 阻断",
+      "游戏下载流量与网页流量混在一起，导致误走代理白白浪费节点流量"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在 Clash 中添加 Steam 社区专用分流规则",
+        "detail": "在分流规则中将 steamcommunity.com 指向 PROXY 节点，而将游戏下载域名 (steampowered.com / steamcontent.com) 指向 DIRECT 直连，既能秒开社区，下载游戏又能跑满国内千兆宽带！",
+        "code": "rules:\n  - DOMAIN-SUFFIX,steamcommunity.com,PROXY\n  - DOMAIN-SUFFIX,steamcontent.com,DIRECT\n  - DOMAIN-SUFFIX,steampowered.com,DIRECT"
+      },
+      {
+        "stepTitle": "步骤 2：刷新本地 hosts 与 DNS 缓存",
+        "detail": "在 CMD 运行 ipconfig /flushdns，重启 Steam 客户端即可丝滑进入创意工坊。"
+      }
+    ],
+    "faqTips": "这种动静分离的分流策略是玩 Steam 必须掌握的高级技巧，千万不要用代理去跑几十 GB 的游戏更新。",
+    "relatedSlugs": [
+      "bypass-steam-epic-game-download",
+      "error-udp-nat-symmetric-restricted"
+    ]
+  },
+  {
+    "id": "faq-71",
+    "slug": "netflix-only-originals-fix",
+    "title": "Netflix 只能看自制剧、搜不到非自制版权剧解决全解 (半解锁 vs 全解锁)",
+    "category": "streaming",
+    "categoryLabel": "流媒体解锁",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "深入剖析为什么在奈飞上只能看到《怪奇物语》等自制剧，而搜不到绝命毒师、进击的巨人等热门非自制剧的原因。",
+    "symptoms": [
+      "搜索《绝命毒师》(Breaking Bad) 或热门日本动漫没有任何播放结果",
+      "首页推荐清一色全部带有大大的红色「N」标标志（Netflix 自制剧）",
+      "换了几个节点依然无法查看当地独家版权库"
+    ],
+    "rootCauses": [
+      "Netflix 的版权策略：自制剧版权归其全球所有，只要通过基础代理就可以看；而非自制剧版权分国家地区购买，奈飞会自动比对当前 IP 是否属于机房 IP，若是机房 IP 则启动「半解锁限制」，仅开放自制剧库"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：更换为带有「原生解锁 / 全解锁」标签的专线节点",
+        "detail": "在客户端挑选标有「NF 全解」、「原生 IP」或住宅出口的节点（如飞猫云、Firefly 机场）。这些节点配置了原生家宽 IP 伪装，能完全解锁当地独家影视库。"
+      },
+      {
+        "stepTitle": "步骤 2：清除浏览器缓存与 App 播放记录后重试",
+        "detail": "Netflix 会在本地 Cookie 中缓存最近一次的地理区域判定，切完节点后必须完全关闭浏览器标签页并重新打开。"
+      }
+    ],
+    "faqTips": "挑选机场时务必看清其宣称的是「全解锁」还是仅「自制剧解锁」，只有全解锁才能畅享完整的全球影视盛宴。",
+    "relatedSlugs": [
+      "netflix-error-m7111-5059-proxy",
+      "disney-plus-error-83-73"
+    ]
+  },
+  {
+    "id": "faq-72",
+    "slug": "netflix-error-m7111-5059-proxy",
+    "title": "Netflix 提示「You seem to be using an unblocker or proxy (M7111-5059)」排错",
+    "category": "streaming",
+    "categoryLabel": "流媒体解锁",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "点击播放时突然弹出 M7111-5059 代理检测报错、无法串流视频的紧急应对方案。",
+    "symptoms": [
+      "视频画面加载到 24% 突然中断，弹出红字提示：您似乎在使用解锁工具或代理...",
+      "电脑网页版和电视 TV 端均出现相同错误代码 M7111-5059",
+      "切换为其他剧集依然无法播放"
+    ],
+    "rootCauses": [
+      "Netflix 的智能风控系统实时探测到了当前 IP 的高频并发观影行为，临时将该出口拉黑"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在节点列表中切换同国家的备用节点",
+        "detail": "优质机场通常提供香港 01、02、03 多组不同出口，切换至其他未被封锁的节点即可秒过。"
+      },
+      {
+        "stepTitle": "步骤 2：排查本地 DNS 泄漏",
+        "detail": "确保没有开启 IPv6，且 DNS 解析走的是远端代理而不是国内直连，防止国内 DNS 泄露触发风控。"
+      }
+    ],
+    "faqTips": "电视盒子用户若遇到此问题，可以在盒子端重启一次播放器或清除 Netflix 缓存应用数据。",
+    "relatedSlugs": [
+      "netflix-only-originals-fix",
+      "dns-leak-detection-fix"
+    ]
+  },
+  {
+    "id": "faq-73",
+    "slug": "disney-plus-error-83-73",
+    "title": "Disney+ 报错 Error 83 设备不兼容或 Error 73 地区不可用全解",
+    "category": "streaming",
+    "categoryLabel": "流媒体解锁",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "观看漫威、星球大战等迪士尼内容时，提示 Error 83 或 Error 73 的设备环境与节点排查。",
+    "symptoms": [
+      "点击播放提示：Something went wrong. Please try again. Error Code 83",
+      "登录页面显示：Disney+ is not available in your region. Error Code 73",
+      "手机能看但电视端 Apple TV 报错无法加载"
+    ],
+    "rootCauses": [
+      "Error 73 代表 IP 地理位置不在 Disney+ 正式开展业务的国家名单中，或当前节点被检测出是代理",
+      "Error 83 代表设备 DRM 硬件安全级别不达标或浏览器未通过 Widevine L1 认证"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：针对 Error 73 更换为新加坡/美日支持地区的专线",
+        "detail": "切换至具备 Disney+ 官方认证解锁的专线节点，规避代理 IP 屏蔽。"
+      },
+      {
+        "stepTitle": "步骤 2：针对 Error 83 更换正规浏览器并开启 DRM 支持",
+        "detail": "在 Chrome / Edge 中进入设置，确保开启了「受保护的内容 (Protected content)」播放权限，避免使用精简版或非官方魔改浏览器。"
+      }
+    ],
+    "faqTips": "使用安卓电视盒子的朋友，务必确认盒子是否具备 Google 官方认证 (Netflix / Widevine L1)，否则很容易报 Error 83。",
+    "relatedSlugs": [
+      "netflix-only-originals-fix",
+      "hbo-max-geo-restriction-bypass"
+    ]
+  },
+  {
+    "id": "faq-74",
+    "slug": "youtube-premium-family-region-lock",
+    "title": "YouTube Premium 家庭组锁区与切区扣费失败排查",
+    "category": "streaming",
+    "categoryLabel": "流媒体解锁",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "办理土耳其、阿根廷、乌克兰或尼日利亚低价区 YouTube 会员时被强制取消或无法加入家庭组的方案。",
+    "symptoms": [
+      "加入好友家庭组时提示：您似乎与家庭管理员不在同一个国家/地区",
+      "订阅续费时提示交易失败，强制要求更新本地发卡行信用卡",
+      "账号被 Google 强制遣返回原籍"
+    ],
+    "rootCauses": [
+      "Google 支付资料中绑定的国家与当前代理 IP 所在国不一致",
+      "家庭组所有成员的 Google Pay 账单国家没有统一对齐"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在 Google Pay 中删除多余旧国家支付资料",
+        "detail": "访问 pay.google.com ->「设置」，检查是否有名为国内或其他国家的旧支付档案，将其关闭，只保留目标国家的独立资料。"
+      },
+      {
+        "stepTitle": "步骤 2：加入家庭组时全程挂对应国家的专线节点",
+        "detail": "所有家庭成员在点击邀请链接时，必须统一挂在管理员开通地区（如乌克兰或土耳其）的节点下接受邀请。"
+      }
+    ],
+    "faqTips": "现在 Google 对跨区合租打击严格，开通完成后日常正常看视频可以随意切换到香港或日本低延迟节点，无需常驻低价区节点。",
+    "relatedSlugs": [
+      "spotify-change-country-gray-songs",
+      "apple-id-foreign-region-change"
+    ]
+  },
+  {
+    "id": "faq-75",
+    "slug": "spotify-change-country-gray-songs",
+    "title": "Spotify 无法更改国家地区与歌单部分歌曲发灰版权限制",
+    "category": "streaming",
+    "categoryLabel": "流媒体解锁",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "使用 Spotify 遇到免费账号每 14 天强制验证地区，以及部分周杰伦等中文流行歌发灰不可听的解决。",
+    "symptoms": [
+      "免费版用户每两周提示：您似乎出国了，请在网页端更新国家地区",
+      "修改个人档案时，下拉列表中的 Country/Region 为灰色无法点击",
+      "同一个歌单在美区账号下部分歌曲发灰无法播放"
+    ],
+    "rootCauses": [
+      "Spotify 规定免费用户必须每 14 天在绑定的国家节点下登录一次核验",
+      "不同国家音乐版权库不同（如日区、港区中文歌版权多，而美区可能受限）"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：挂目标国家节点进入 Spotify 官网更新个人资料",
+        "detail": "挂上目标国家的节点（如香港节点），打开 spotify.com/account，在「编辑个人资料」中的国家下拉菜单即可选择当前 IP 所在国并点击保存。"
+      },
+      {
+        "stepTitle": "步骤 2：开通 Premium 会员彻底免除 14 天限制",
+        "detail": "只要账号是付费的 Spotify Premium（包括家庭组会员），即可在全球任何国家地区无限期免代理随意收听，且绝不弹窗强制核验。"
+      }
+    ],
+    "faqTips": "中文歌听得多的朋友首推开通香港 (HK) 或台湾 (TW) 地区，欧美流行乐听得多推荐美区或日区。",
+    "relatedSlugs": [
+      "youtube-premium-family-region-lock",
+      "bilibili-taiwan-hk-unblock-rule"
+    ]
+  },
+  {
+    "id": "faq-76",
+    "slug": "tiktok-black-screen-zero-views",
+    "title": "运营 TikTok 遇到黑屏、零播放与拔卡防定位保姆级方案",
+    "category": "streaming",
+    "categoryLabel": "流媒体解锁",
+    "readTime": "6 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "国内做跨境电商、短视频出海的用户使用 TikTok 提示 Hot video not found、视频发出去全是 0 播放的根治实操。",
+    "symptoms": [
+      "打开 TikTok 刷不出任何视频，界面全黑或提示 No internet connection",
+      "发布了十几个精心制作的视频，系统播放量全部死死卡在 0 Views",
+      "无法点赞、关注别人刷新后自动取消"
+    ],
+    "rootCauses": [
+      "TikTok 客户端内部集成严格的运营商识别机制（读取 SIM 卡的 MCC/MNC 代码，探测到 460 开头的中国移动/电信卡直接熔断黑屏）",
+      "系统底层语言为中文、时区为东八区、地理位置定位服务暴露了真实国内坐标",
+      "使用了滥用严重的共享机房 IP，被 TikTok 算法直接判定为批量营销垃圾号限流"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：硬件级拔掉国内 SIM 电话卡（核心关键）",
+        "detail": "运营专用手机必须拔掉所有国内 SIM 卡（若需插卡可购买海外原生卡如英国 Giffgaff），并关闭手机「位置服务/GPS 定位」。"
+      },
+      {
+        "stepTitle": "步骤 2：修改系统语言为英语，时区与目标国完全对齐",
+        "detail": "做美区就改成美国时区与英语；在分流规则中确保包含 TikTok 专属规则集，开启 TUN 模式接管全量流量。"
+      },
+      {
+        "stepTitle": "步骤 3：选用跨界云等提供「纯净商业静态家宽出口」的专属节点",
+        "detail": "发视频必须使用纯净无污染的原生独享出口，避开万人踩踏的廉价公共节点，算法才能正常给与推荐推流池。"
+      }
+    ],
+    "faqTips": "在浏览器网页端打开 tiktok.com 是排查是账号被封还是手机环境暴露的最快试金石。",
+    "relatedSlugs": [
+      "chatgpt-access-denied-error-1020",
+      "apple-id-foreign-region-change"
+    ]
+  },
+  {
+    "id": "faq-77",
+    "slug": "hbo-max-geo-restriction-bypass",
+    "title": "Max (前 HBO Max) 提示「Not Available in Your Region」实测解锁",
+    "category": "streaming",
+    "categoryLabel": "流媒体解锁",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "观看《权力的游戏》、《龙之家族》等 HBO 顶级美剧时遭遇 Max 全面区域限制的解锁指南。",
+    "symptoms": [
+      "访问 max.com 页面中间出现大字：Max is Not Available in Your Region Yet",
+      "点击播放提示服务不可用",
+      "账号无法正常订阅购买"
+    ],
+    "rootCauses": [
+      "Max (华纳兄弟) 对海外 IP 的反代理过滤机制极其敏感，对常见 IDC 机房段实施全网封杀"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：选用正规美国或欧洲已开通 Max 业务的专线节点",
+        "detail": "在客户端挑选经过 Max 解锁实测的节点，确保出口归属地处于官方已上线的北美等地区。"
+      },
+      {
+        "stepTitle": "步骤 2：在客户端开启 IPv6 屏蔽与分流规则覆盖",
+        "detail": "确保 max.com 与 hbomax.com 旗下全系媒体静态域名全部走 PROXY 代理节点出站。"
+      }
+    ],
+    "faqTips": "Max 现已推出超高清 4K 杜比视界码率，建议搭配峰值带宽 500M 以上的专线获得最佳视听体验。",
+    "relatedSlugs": [
+      "netflix-only-originals-fix",
+      "disney-plus-error-83-73"
+    ]
+  },
+  {
+    "id": "faq-78",
+    "slug": "amazon-prime-video-vpn-detected",
+    "title": "亚马逊 Prime Video 提示检测到代理与跨区视频播放穿透配置",
+    "category": "streaming",
+    "categoryLabel": "流媒体解锁",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "Amazon Prime Video 提示无法使用 VPN 访问其流媒体内容的排错方案。",
+    "symptoms": [
+      "点击播放提示：Your device is connected to the Internet using a VPN or proxy service (Error 4601)",
+      "只能看免费预告片，正片无法缓冲播放"
+    ],
+    "rootCauses": [
+      "亚马逊自身就是全球最大的云计算厂商 AWS，对其自身及竞品的机房 IP 库掌握极全，机房节点秒识别"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：必须选用具有「原生家庭宽带/住宅 ISP」标签的节点",
+        "detail": "唯有利用真正拥有住宅 ISP（如 AT&T、Verizon、Comcast 等真实家用宽带）标签的节点出口才能完全骗过亚马逊的检测。"
+      },
+      {
+        "stepTitle": "步骤 2：保持与亚马逊购物账号地区统一",
+        "detail": "使用对应的美区或日区独立亚马逊账号登录，避免账号跨区风控。"
+      }
+    ],
+    "faqTips": "Prime Video 对节点纯净度要求极高，建议使用 Firefly 机场或隐形人这类配备高质量住宅 IP 的服务。",
+    "relatedSlugs": [
+      "netflix-error-m7111-5059-proxy",
+      "hulu-error-p-dev320-anonymous-proxy"
+    ]
+  },
+  {
+    "id": "faq-79",
+    "slug": "hulu-error-p-dev320-anonymous-proxy",
+    "title": "Hulu 提示匿名代理防护阻断 (P-DEV320) 的节点筛选标准",
+    "category": "streaming",
+    "categoryLabel": "流媒体解锁",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "针对老牌美国流媒体 Hulu 提示 We're having trouble playing this (P-DEV320) 的终极方案。",
+    "symptoms": [
+      "播放视频加载进度条后弹出代码 P-DEV320",
+      "提示使用匿名代理网络无法播放",
+      "登录界面正常，但正片无法串流"
+    ],
+    "rootCauses": [
+      "Hulu 与 Disney+ 同属迪士尼旗下流媒体安全架构，对常规公共 VPN 具备极高查杀率"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：挑选标注「Hulu 解锁」的美区专线节点",
+        "detail": "在节点列表中挑选针对 Hulu 部署了解锁分流反代脚本的专享美西节点。"
+      },
+      {
+        "stepTitle": "步骤 2：切换浏览器并清空本地存储",
+        "detail": "清除包含旧 session 的本地数据，使用无痕窗口重新载入视频播放器。"
+      }
+    ],
+    "faqTips": "Hulu 账号建议绑定美国本地发行的信用卡或美区 PayPal，订阅稳定性最佳。",
+    "relatedSlugs": [
+      "disney-plus-error-83-73",
+      "amazon-prime-video-vpn-detected"
+    ]
+  },
+  {
+    "id": "faq-80",
+    "slug": "bbc-iplayer-uk-tv-license-check",
+    "title": "观看英国 BBC iPlayer 专线选择与电视授权 (TV License) 弹窗应对",
+    "category": "streaming",
+    "categoryLabel": "流媒体解锁",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "免费观看英国顶级纪录片、奥运赛事直播与 BBC 节目的防封技巧与邮编验证指南。",
+    "symptoms": [
+      "页面提示：BBC iPlayer only works in the UK. Sorry, it's due to rights issues.",
+      "弹窗询问：Do you have a TV License?",
+      "缓冲极慢经常卡死"
+    ],
+    "rootCauses": [
+      "节点 IP 经过解析发现并非英国原生本土 IP，或虽然属于英国但已被 BBC 封禁"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：选用英国本土伦敦/曼彻斯特原生专线节点",
+        "detail": "确保节点测试时的地理位置为正规 United Kingdom，延迟适中。"
+      },
+      {
+        "stepTitle": "步骤 2：弹窗询问 TV License 时果断点击「I have a TV License」",
+        "detail": "在注册账号时填写正规英国邮编（如伦敦邮编 SW1A 1AA 或 E1 6AN），弹窗询问是否有电视税牌照时，直接点击确认勾选「Yes, I have a TV License」即可免费畅享全部 4K 高码率内容！"
+      }
+    ],
+    "faqTips": "BBC iPlayer 完全免费且画质顶级，只要选对英国专线并填对邮编，即可享受世界一流的纪录片库。",
+    "relatedSlugs": [
+      "abema-tv-japan-vpn-block",
+      "tvb-mytv-super-hong-kong-proxy"
+    ]
+  },
+  {
+    "id": "faq-81",
+    "slug": "abema-tv-japan-vpn-block",
+    "title": "日本 AbemaTV 提示「Not available in your area」海外 IP 绕过技巧",
+    "category": "streaming",
+    "categoryLabel": "流媒体解锁",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "观看日本动漫新番独播、声优生放送与体育赛事的 AbemaTV 专用分流规则。",
+    "symptoms": [
+      "打开 Abema 页面提示：お住まいの地域ではご視聴できません (您所在的地区无法收看)",
+      "普通视频能放，但一旦进入付费或独播频道就直接报错",
+      "手机 App 无法进入首页"
+    ],
+    "rootCauses": [
+      "AbemaTV 对海外访问审查极其严格，常规日本机房（如 Sakura、ConoHa、AWS 东京）全部被列入拒访黑名单"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：选用支持「Abema 解锁」的原生日本家庭节点",
+        "detail": "选用节点列表中标明原生日本住宅出口（如 NTT、KDDI 或 SoftBank 家宽广播）的专线节点。"
+      },
+      {
+        "stepTitle": "步骤 2：在客户端中添加 Abema 完整分流策略",
+        "detail": "确保 abema.tv、hayabusa.io 等全系媒体推流分发域名统一指定走日本 PROXY 出站。"
+      }
+    ],
+    "faqTips": "日本流媒体大多具有严苛的排他性反爬策略，认准能够解锁 Abema 的节点通常也能轻松搞定 DMM 与动画疯。",
+    "relatedSlugs": [
+      "bahamut-ani-gamer-taiwan-ip",
+      "bbc-iplayer-uk-tv-license-check"
+    ]
+  },
+  {
+    "id": "faq-82",
+    "slug": "bahamut-ani-gamer-taiwan-ip",
+    "title": "台湾巴哈姆特动画疯限制台湾原生 IP 的分流规则配置",
+    "category": "streaming",
+    "categoryLabel": "流媒体解锁",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "二次元必备看无修无删减正版番剧的台湾动画疯提示「此影片仅限台湾地区播放」处理。",
+    "symptoms": [
+      "视频播放窗口提示：目前由于版权限制，本片仅限台湾地区收看",
+      "广告加载完后正片黑屏不播",
+      "登录巴哈姆特账号后无法购买无广告 VIP"
+    ],
+    "rootCauses": [
+      "使用了香港节点误以为台湾能看，或者使用了非台湾原生广播的伪装机房 IP"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：必须切换为真正的「台湾 (TW)」专线节点",
+        "detail": "动画疯只认台湾本土 IP（如中华电信 HiNet、台湾固网等），在节点列表中选择台湾优质专线。"
+      },
+      {
+        "stepTitle": "步骤 2：在分流规则中将 gamer.com.tw 锁定走台湾节点",
+        "detail": "在 Clash 中为巴哈姆特设立专用策略组，固定绑定台湾节点，日常无需手动换来换去。"
+      }
+    ],
+    "faqTips": "动画疯配合台湾 HiNet 专线，晚高峰播放 1080P 高码率番剧体验极其稳定且无删减。",
+    "relatedSlugs": [
+      "bilibili-taiwan-hk-unblock-rule",
+      "abema-tv-japan-vpn-block"
+    ]
+  },
+  {
+    "id": "faq-83",
+    "slug": "tvb-mytv-super-hong-kong-proxy",
+    "title": "香港 myTV SUPER 与 ViuTV 仅限香港 IP 播放配置实战",
+    "category": "streaming",
+    "categoryLabel": "流媒体解锁",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "港剧迷与粤语文化爱好者观看香港本地电视台直播与经典港剧的点播指南。",
+    "symptoms": [
+      "打开 ViuTV 播放直播提示「This content is only available in Hong Kong」",
+      "myTV SUPER 提示地区受限无法完成身份验证"
+    ],
+    "rootCauses": [
+      "香港本地版权法严格限制境外播放，对常见的公用数据中心 IP 进行了精准限制"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：切换为香港原生家庭出口专线",
+        "detail": "选用标有「香港原生」、「HKT / HKBN 香港宽频」的专线节点，完美模拟香港本地居民宽带环境。"
+      },
+      {
+        "stepTitle": "步骤 2：添加 ViuTV 与 TVB 专属分流规则",
+        "detail": "确保 viutv.com 与 mytvsuper.com 均由香港专线统一接管。"
+      }
+    ],
+    "faqTips": "深港 IPLC 专线由于物理距离近，国内访问香港延迟通常只有 15~30ms，看直播极其顺滑。",
+    "relatedSlugs": [
+      "bilibili-taiwan-hk-unblock-rule",
+      "bahamut-ani-gamer-taiwan-ip"
+    ]
+  },
+  {
+    "id": "faq-84",
+    "slug": "crunchyroll-blocked-outside-us",
+    "title": "欧美主流动漫平台 Crunchyroll 跨区观看与字幕语言加载异常修复",
+    "category": "streaming",
+    "categoryLabel": "流媒体解锁",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "全球最大的海外动漫平台 Crunchyroll (索尼旗下) 跨区观看超全欧美英文字幕动漫对策。",
+    "symptoms": [
+      "打开 crunchyroll.com 页面卡死无法加载海报",
+      "视频可以播放但无法切换多种语言字幕",
+      "提示 403 Forbidden 无法登录已有付费会员"
+    ],
+    "rootCauses": [
+      "Cloudflare 针对非欧美本土请求设置了极高的安全防火墙挑战"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：使用美区或欧洲优质专线节点",
+        "detail": "确保出站流量完全走美区原生专线，享受最全的动漫版权库。"
+      },
+      {
+        "stepTitle": "步骤 2：清除浏览器 IndexedDB 缓存",
+        "detail": "清除存储在本地播放器中的旧地区令牌，重新加载播放器核心。"
+      }
+    ],
+    "faqTips": "Crunchyroll 是学英语、看高画质无删减日漫的绝佳海外平台，画质与音轨极其丰富。",
+    "relatedSlugs": [
+      "abema-tv-japan-vpn-block",
+      "disney-plus-error-83-73"
+    ]
+  },
+  {
+    "id": "faq-85",
+    "slug": "dazn-sports-vpn-geo-blocking",
+    "title": "体育直播平台 DAZN 严格反代理检测与低风控专线筛选方案",
+    "category": "streaming",
+    "categoryLabel": "流媒体解锁",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "观看欧洲五大联赛、欧冠与 F1 赛车直播时，遭遇 DAZN 最严反 VPN 封禁的解决建议。",
+    "symptoms": [
+      "提示：DAZN isn't available in this country 或 Error 50-006-403",
+      "无论换哪个日本或德国节点均被提示使用了代理，账号甚至面临封禁风险"
+    ],
+    "rootCauses": [
+      "DAZN 采用业界最顶级的 GeoComply 地理位置与反代理识别引擎，查杀率堪称流媒体之最"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：必须且只能使用独享纯净原生住宅 IP",
+        "detail": "普通共享机场节点 99% 会在 DAZN 面前阵亡，必须选用大佬云等高端商务出海专线的独享住宅 IP 才能稳定观看。"
+      },
+      {
+        "stepTitle": "步骤 2：关闭浏览器的一切地理位置权限与 WebRTC",
+        "detail": "防止浏览器通过 Wi-Fi BSSID 嗅探或 WebRTC 本地内网广播泄露真实的国内物理坐标。"
+      }
+    ],
+    "faqTips": "对 DAZN 这类极致严苛的平台，不要尝试用几块钱的平价机场去碰运气，专业体育发烧友请认准纯独享专线。",
+    "relatedSlugs": [
+      "amazon-prime-video-vpn-detected",
+      "bbc-iplayer-uk-tv-license-check"
+    ]
+  },
+  {
+    "id": "faq-86",
+    "slug": "domestic-speed-slow-when-proxy-on",
+    "title": "开启代理后国内微信/百度/淘宝/京东极慢排查与加速优化",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "新手最常遇到的痛点：开启科学上网后外网秒开了，但国内微信发不出去、淘宝打不开的彻底优化。",
+    "symptoms": [
+      "打开代理软件后，微信电脑版发送图片一直转圈",
+      "淘宝、京东、B站首页加载极其缓慢，视频只能看 360P 标清",
+      "网易云音乐提示因版权限制无法在当前地区播放"
+    ],
+    "rootCauses": [
+      "客户端被错误地设置成了「全局模式 (Global)」，导致国内淘宝微信流量全部绕道香港/美国再绕回国内，延迟暴增且白白浪费机场流量",
+      "分流规则中缺失了针对中国大陆域名与 IP 段的 GEOIP:CN / GEOSITE:CN 直连规则",
+      "DNS 解析发生严重污染，国内域名被解析到了境外无 CDN 的远端服务器"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：必须且务必将客户端切换为「规则模式 (Rule)」",
+        "detail": "在 Clash Verge Rev、Mihomo 或小火箭中，将运行模式从「全局 (Global)」切换为「规则 (Rule)」。在规则模式下，只有被封锁的境外网站走代理，国内所有流量自动原速直连！"
+      },
+      {
+        "stepTitle": "步骤 2：优化 DNS 分流配置（国内域名国内解析）",
+        "detail": "在客户端配置中，确保 default-nameserver 和 nameserver 包含国内权威 DNS（223.5.5.5 和 119.29.29.29），让国内网站解析到离你家最近的本地 CDN 机房。"
+      },
+      {
+        "stepTitle": "步骤 3：更新 GeoIP / GeoSite 官方大陆白名单数据库",
+        "detail": "在客户端设置中点击更新 GeoIP 数据库，确保最新的中国企业网段不会被误杀判定为境外流量。"
+      }
+    ],
+    "faqTips": "规则模式是科学上网最科学、最优雅的常驻方案，日常挂着不用关，国内国外两不误。",
+    "relatedSlugs": [
+      "global-vs-rule-vs-direct-difference",
+      "clash-tun-fake-ip-vs-redir-host"
+    ]
+  },
+  {
+    "id": "faq-87",
+    "slug": "lan-share-proxy-switch-ps5-xbox",
+    "title": "将电脑代理局域网共享给 Switch / PS5 / Xbox 主机下载联机加速",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "无需购买额外的主机加速盒，利用手头 Windows / Mac 电脑为游戏主机提供满速下载与 NAT 优化的保姆级教程。",
+    "symptoms": [
+      "Switch 商店 eShop 一直打不开报错 2811-7503",
+      "PS5 游戏下载只有几百 KB/s，更新大补丁需要十几天",
+      "Xbox 联机 NAT 类型显示为严格或不可用"
+    ],
+    "rootCauses": [
+      "游戏主机默认不具备直接安装 Clash/Sing-box 等第三方开源代理客户端的能力"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在电脑端开启「允许局域网连接 (Allow LAN)」",
+        "detail": "打开 Clash Verge Rev 设置 -> 勾选「允许局域网连接 (Allow LAN)」，记录下电脑本机的局域网 IP（如 192.168.1.100）和混合端口（通常为 7890）。"
+      },
+      {
+        "stepTitle": "步骤 2：在游戏主机中手动配置网络代理",
+        "detail": "在 Switch/PS5 的网络设置中，选择当前 Wi-Fi ->「更改设置」-> 将「代理服务器 (Proxy)」改为「使用」->「服务器地址」填入电脑的局域网 IP（192.168.1.100），「端口号」填入 7890，保存连接即可！"
+      },
+      {
+        "stepTitle": "步骤 3：在电脑防火墙中允许 7890 端口入站",
+        "detail": "如果主机连接测试失败，在 Windows 防火墙中添加一条允许入站规则，放行 TCP 7890 端口即可畅通无阻。"
+      }
+    ],
+    "faqTips": "下载游戏时，在电脑客户端选择不限速的大带宽专线节点，Switch/PS5 即可轻松跑满家庭百兆宽带。",
+    "relatedSlugs": [
+      "error-udp-nat-symmetric-restricted",
+      "bypass-steam-epic-game-download"
+    ]
+  },
+  {
+    "id": "faq-88",
+    "slug": "global-vs-rule-vs-direct-difference",
+    "title": "全局代理 (Global)、规则分流 (Rule) 与直连 (Direct) 本质区别深度解析",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "一文彻底搞懂代理客户端核心的三大分流工作模式，什么场景下该用哪种模式的终极指南。",
+    "symptoms": [
+      "不知道平时应该常驻哪种模式最省流量、速度最快",
+      "不小心选了全局模式导致微信掉线或流量飞速耗尽",
+      "选了直连模式以为在翻墙结果连 Google 都打不开"
+    ],
+    "rootCauses": [
+      "模式概念混淆不清：规则 (Rule) 相当于智能导航，全局 (Global) 相当于一刀切全部出境，直连 (Direct) 相当于彻底不走代理"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "模式 1：规则模式 (Rule) —— 99% 场景下的日常唯一首选",
+        "detail": "智能判断目标域名。命中黑名单/海外域名的自动走代理节点；命中白名单/国内域名的自动走国内直连。完全不用手动干预，速度最快、最省流量。"
+      },
+      {
+        "stepTitle": "模式 2：全局模式 (Global) —— 仅用于小众冷门网站应急排错",
+        "detail": "不管访问什么网站（哪怕是百度），全部强行打包发往当前选中的海外节点。仅在遇到极冷门小众海外网站未被规则库收录、打不开时，临时开启测试排查。"
+      },
+      {
+        "stepTitle": "模式 3：直接连接 (Direct) —— 相当于完全关闭代理功能",
+        "detail": "所有流量均不通过任何境外节点，直接从你的物理网卡发出，相当于没有打开科学上网软件。"
+      }
+    ],
+    "faqTips": "记住日常永远保持在「规则模式 (Rule)」即可，省心、极速、无感加速。",
+    "relatedSlugs": [
+      "domestic-speed-slow-when-proxy-on",
+      "clash-verge-custom-rules-override"
+    ]
+  },
+  {
+    "id": "faq-89",
+    "slug": "openwrt-openclash-double-routing-crash",
+    "title": "软路由 OpenClash 开启后断网或与主路由 DHCP 冲突终极排错",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "6 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "在 OpenWrt 软路由 / 旁路由中部署 OpenClash 常见的大陆白名单失效、网关死锁与断网处理。",
+    "symptoms": [
+      "软路由安装并启动 OpenClash 后，整屋设备瞬间无法上网",
+      "后台不断报错：Can not resolve github.com / Core stopped",
+      "局域网内部设备互 ping 丢包率高达 50%"
+    ],
+    "rootCauses": [
+      "旁路由开启了自身的 DHCP 服务器，导致局域网内存在两个 DHCP 发生 IP 冲突",
+      "防火墙自定义规则中没有添加正确的 MASQUERADE 伪装规则，导致上行数据包回包路径混乱",
+      "DNS 53 端口被系统默认的 Dnsmasq 占死，OpenClash 无法接管"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：旁路由务必关闭自身 DHCP 并设置网关指向主路由",
+        "detail": "在 OpenWrt「网络」->「接口」->「LAN」->「DHCP 服务器」，勾选「忽略此接口」（彻底关闭 DHCP）；网关和 DNS 均填入主路由 IP（如 192.168.1.1）。"
+      },
+      {
+        "stepTitle": "步骤 2：在 OpenWrt 防火墙添加经典的 IP 伪装规则",
+        "detail": "进入「网络」->「防火墙」->「自定义规则」，在末尾添加以下一行规则并重启防火墙：",
+        "code": "iptables -t nat -A POSTROUTING -o br-lan -j MASQUERADE"
+      },
+      {
+        "stepTitle": "步骤 3：运行模式优先选择「Meta-TUN (Fake-IP)」模式",
+        "detail": "OpenClash 高级设置中，将运行模式切换为 Meta 内核的 TUN 混合模式，兼容性与吞吐性能最佳。"
+      }
+    ],
+    "faqTips": "软路由配置复杂，如果只是个人电脑或手机使用，直接安装单机版 Clash Verge Rev 体验往往比折腾软路由更省心稳定。",
+    "relatedSlugs": [
+      "clash-tun-fake-ip-vs-redir-host",
+      "surge-enhanced-mode-router-gateway"
+    ]
+  },
+  {
+    "id": "faq-90",
+    "slug": "clash-verge-custom-rules-override",
+    "title": "如何在 Clash Verge Rev 中添加自定义直连与代理规则 (完整语法示范)",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "教你通过扩展配置 (Merge / Script) 自主添加指定网站走直连、特定内网 IP 走代理的高级技巧。",
+    "symptoms": [
+      "公司内部办公系统或特定校园网域名被误判走了代理导致无法登录",
+      "想让某个小众海外生肉漫画网站固定走日本高速专线"
+    ],
+    "rootCauses": [
+      "通用公共订阅的规则库不可能覆盖全网所有私有或小众域名，需要个性化前置规则覆盖"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：新建一个 Merge 类型的订阅扩展",
+        "detail": "打开 Clash Verge Rev ->「订阅」-> 在顶部点击「新建」-> 类型选择「Merge」，命名为「我的自定义分流规则」。"
+      },
+      {
+        "stepTitle": "步骤 2：按标准语法编写前置规则并置顶",
+        "detail": "在 rules 列表顶部添加你的特定域名规则。Clash 是自上而下匹配的，写在最顶部的规则拥有最高优先级！",
+        "code": "prepend-rules:\n  # 让公司内部域名绝对直连\n  - DOMAIN-SUFFIX,company-internal.com,DIRECT\n  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve\n  # 让特定学术网站强制走代理专线\n  - DOMAIN-SUFFIX,sciencedirect.com,PROXY\n  - DOMAIN-KEYWORD,torrent,REJECT"
+      },
+      {
+        "stepTitle": "步骤 3：右键启用并保存",
+        "detail": "在扩展配置列表中，右键该条目点击「启用」，随后右键你的机场订阅点击「刷新」，自定义规则即刻永久生效！"
+      }
+    ],
+    "faqTips": "建议优先使用 prepend-rules（前置规则），防止自定义规则被机场自带的基础规则淹没在底部失效。",
+    "relatedSlugs": [
+      "clash-verge-script-override-error",
+      "bypass-private-lan-ip-clash"
+    ]
+  },
+  {
+    "id": "faq-91",
+    "slug": "campus-network-port-blocking-bypass",
+    "title": "校园网或公司内网封锁非 80/443 端口代理的突破方案",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "在大学校园网、医院或严格企业网络中，只放行 Web 端口、封死全部非常规端口的高效突破手段。",
+    "symptoms": [
+      "在普通家里宽带用得好好的节点，到了大学宿舍或公司内网后所有节点全部报 Timeout 超时",
+      "用手机热点可以正常翻墙，切换到校园网有线/无线瞬间瘫痪",
+      "网络管理中心开启了严格的防火墙端口白名单机制"
+    ],
+    "rootCauses": [
+      "企业或高校的防火墙配置了严格的安全策略，仅允许目的端口为 80 (HTTP) 和 443 (HTTPS) 的连接流出，而大部分机场节点的公网端口是 10000~60000 的随机高位端口"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在节点列表中挑选目标端口为 443 的专用节点",
+        "detail": "观察节点列表中的端口号，挑选使用 Trojan 或 Vless 且端口标明为 443 的节点。防火墙会将其直接视为合法的标准 HTTPS 网页流量予以放行。"
+      },
+      {
+        "stepTitle": "步骤 2：选用支持多端口复用或端口转发的优质机场",
+        "detail": "优秀的机场（如飞V、隐形人）通常提供专用的「443 穿透专线」或支持全端口复用，专为校园网与严苛内网环境设计。"
+      }
+    ],
+    "faqTips": "在学校宿舍连不上千万别以为是机场跑路了，优先看一眼节点端口是不是被校园网防火墙给掐了。",
+    "relatedSlugs": [
+      "error-dial-tcp-timeout-10000ms",
+      "error-tls-handshake-timeout"
+    ]
+  },
+  {
+    "id": "faq-92",
+    "slug": "wsl2-ubuntu-windows-proxy-setup",
+    "title": "Windows 11 WSL2 子系统共享宿主机 Clash 代理一键配置脚本",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "开发者在 Windows WSL2 (Ubuntu) 命令行中运行 apt update、git clone 极速共享主机代理的配置。",
+    "symptoms": [
+      "Windows 宿主机网页可以正常秒开 Google，但 WSL2 终端里运行 git clone 动辄超时卡死",
+      "设置了 export http_proxy=http://127.0.0.1:7890 提示 Connection refused"
+    ],
+    "rootCauses": [
+      "WSL2 采用独立的 Hyper-V 虚拟机架构，WSL 内部的 127.0.0.1 指的是 WSL 自己内部，并不是 Windows 宿主机的 IP！"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：确保 Windows 客户端开启「Allow LAN (允许局域网连接)」",
+        "detail": "在 Clash Verge Rev 中开启「允许局域网连接」，使宿主机端口允许来自虚拟子网网段的请求。"
+      },
+      {
+        "stepTitle": "步骤 2：在 WSL2 的 ~/.bashrc 中写入自动提取宿主机 IP 脚本",
+        "detail": "在 WSL 终端中运行 nano ~/.bashrc，在文件末尾追加以下快捷函数：",
+        "code": "# 自动获取 WSL2 对应的 Windows 宿主机网关 IP 并设置代理\nfunction set_proxy() {\n  host_ip=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}')\n  export http_proxy=\"http://${host_ip}:7890\"\n  export https_proxy=\"http://${host_ip}:7890\"\n  export all_proxy=\"socks5://${host_ip}:7890\"\n  echo \"[+] Proxy set to ${host_ip}:7890\"\n}\n\nfunction unset_proxy() {\n  unset http_proxy https_proxy all_proxy\n  echo \"[-] Proxy cleared.\"\n}"
+      },
+      {
+        "stepTitle": "步骤 3：source 生效并一行命令开启",
+        "detail": "运行 source ~/.bashrc，之后每次需要翻墙只需在终端输入 set_proxy 回车，立即享受千兆极速代理！"
+      }
+    ],
+    "faqTips": "最新的 Windows 11 已支持 WSL 镜像网络模式 (Mirrored Mode)，开启镜像模式后 WSL2 与 Windows 完全共享同一个 localhost，更加无脑丝滑。",
+    "relatedSlugs": [
+      "git-clone-github-ssh-proxy-config",
+      "pip-conda-npm-proxy-terminal"
+    ]
+  },
+  {
+    "id": "faq-93",
+    "slug": "docker-daemon-pull-images-proxy",
+    "title": "Docker 国内镜像大面积失效与配置代理拉取镜像指南",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "针对目前国内各大 Docker 镜像源大面积下线停服，导致 docker pull 报超时失败的工程配置。",
+    "symptoms": [
+      "docker pull ubuntu 提示：Error response from daemon: Get https://registry-1.docker.io/v2/: net/http: request canceled",
+      "原本可用的第三方国内镜像加速地址全部返回 404 或 403 无法拉取镜像"
+    ],
+    "rootCauses": [
+      "官方 Docker Hub 在国内遭到深度阻断，且政策原因导致国内几乎所有公开镜像站关闭",
+      "Docker Daemon 守护进程是系统底层服务，不会自动走当前用户的桌面 HTTP 代理"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：为 Docker Daemon 服务配置 systemd 专用代理环境",
+        "detail": "在 Linux 服务器上创建服务配置覆盖目录，写入 HTTP_PROXY 环境变量并重启 Docker。",
+        "code": "sudo mkdir -p /etc/systemd/system/docker.service.d\nsudo tee /etc/systemd/system/docker.service.d/http-proxy.conf <<EOF\n[Service]\nEnvironment=\"HTTP_PROXY=http://127.0.0.1:7890\"\nEnvironment=\"HTTPS_PROXY=http://127.0.0.1:7890\"\nEnvironment=\"NO_PROXY=localhost,127.0.0.1,docker-registry.somecorporation.com\"\nEOF\n\nsudo systemctl daemon-reload\nsudo systemctl restart docker"
+      },
+      {
+        "stepTitle": "步骤 2：Windows / Mac 桌面端 Docker Desktop 配置",
+        "detail": "直接打开 Docker Desktop 设置 ->「Resources」->「Proxies」-> 开启「Manual proxy configuration」-> Web Server 填 http://127.0.0.1:7890，点击「Apply & restart」即可秒速拉取全球镜像。"
+      }
+    ],
+    "faqTips": "配置完成后，运行 docker info 检查输出最下方的 HTTP Proxy 项，确认代理参数是否已经生效加载。",
+    "relatedSlugs": [
+      "wsl2-ubuntu-windows-proxy-setup",
+      "curl-wget-terminal-proxy-environment"
+    ]
+  },
+  {
+    "id": "faq-94",
+    "slug": "git-clone-github-ssh-proxy-config",
+    "title": "Git 命令行与 SSH 访问 GitHub 极慢的代理配置实用技巧",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "手把手指导如何为 git clone (无论是 HTTPS 还是 git@github.com SSH 协议) 配置高速代理。",
+    "symptoms": [
+      "git clone 仓库长时间卡在 Cloning into... 速度只有 10 KB/s",
+      "报错：Failed to connect to github.com port 443: Timed out",
+      "SSH 协议报错：ssh: connect to host github.com port 22: Connection timed out"
+    ],
+    "rootCauses": [
+      "Git 默认使用系统底层的独立网络套接字，不会自动感知图形界面的系统代理开关"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：为 Git HTTPS 协议一键配置全局代理",
+        "detail": "在终端中运行以下两行命令，将 Git 的 HTTP 和 HTTPS 流量统一转发至 Clash 混合端口：",
+        "code": "git config --global http.proxy \"http://127.0.0.1:7890\"\ngit config --global https.proxy \"http://127.0.0.1:7890\""
+      },
+      {
+        "stepTitle": "步骤 2：为 SSH 密钥协议配置 ~/.ssh/config 转发",
+        "detail": "如果使用 git@github.com 形式 clone，编辑用户目录下的 ~/.ssh/config 文件，添加 connect 命令中转：",
+        "code": "Host github.com\n  User git\n  ProxyCommand connect -H 127.0.0.1:7890 %h %p"
+      }
+    ],
+    "faqTips": "如果要取消 Git 代理，只需运行 git config --global --unset http.proxy 即可随时恢复默认状态。",
+    "relatedSlugs": [
+      "pip-conda-npm-proxy-terminal",
+      "github-copilot-proxy-wsl-ide"
+    ]
+  },
+  {
+    "id": "faq-95",
+    "slug": "pip-conda-npm-proxy-terminal",
+    "title": "Python pip、conda、npm 终端命令行代理环境变量终极设置",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "开发者在命令行执行 pip install、npm install、conda install 频繁超时的优雅解决办法。",
+    "symptoms": [
+      "pip install 报 ReadTimeoutError 或 HTTPSConnectionPool Max retries exceeded",
+      "npm install 卡在 idealTree: sill install loadTypicalDeps 无反应",
+      "Anaconda 下载第三方库几 KB/s 甚至直接断开"
+    ],
+    "rootCauses": [
+      "各大包管理器默认不会走浏览器的代理，必须读取系统环境变数或专用配置文件"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：PowerShell / CMD 快速设置临时会话环境变量",
+        "detail": "在执行安装命令的同一个终端窗口中，先输入以下指令即可瞬间打通网络：",
+        "code": "# PowerShell 中运行：\n$env:http_proxy=\"http://127.0.0.1:7890\"\n$env:https_proxy=\"http://127.0.0.1:7890\"\n\n# 随后直接正常执行安装：\npip install torch"
+      },
+      {
+        "stepTitle": "步骤 2：直接开启 Clash Verge Rev 的 TUN 模式（一劳永逸）",
+        "detail": "开启 TUN 模式后，虚拟网卡在驱动层接管全机流量，pip/npm/conda 自动享受透明代理加速，无需修改任何代码和环境变量！"
+      }
+    ],
+    "faqTips": "临时设置环境变量仅对当前打开的终端小黑窗有效，关闭窗口后自动失效，不会污染整机开发环境。",
+    "relatedSlugs": [
+      "git-clone-github-ssh-proxy-config",
+      "huggingface-model-download-proxy"
+    ]
+  },
+  {
+    "id": "faq-96",
+    "slug": "bypass-private-lan-ip-clash",
+    "title": "避免局域网 NAS (192.168.x.x) 访问误走代理的白名单配置",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "开启代理或 TUN 模式后，局域网共享打印机断开、群晖 NAS 与路由器管理后台进不去的排错。",
+    "symptoms": [
+      "开启客户端后，访问 192.168.1.1 路由器登录后台提示拒绝连接",
+      "访问局域网 NAS (群晖/威联通/极空间) 极其缓慢，文件传输直接超时",
+      "无法连接办公室局域网共享打印机"
+    ],
+    "rootCauses": [
+      "TUN 模式或全局模式把发往私有保留 IP 段（192.168.x.x、10.x.x.x）的流量也当作公网流量打包丢给了境外节点"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在 Clash Verge 中添加系统代理跳过名单 (Bypass)",
+        "detail": "在客户端「系统代理」设置的「绕过域名/IP」列表里，确保包含以下私有网段：",
+        "code": "localhost; 127.*; 10.*; 172.16.*; 172.17.*; 172.18.*; 172.19.*; 172.20.*; 172.21.*; 172.22.*; 172.23.*; 172.24.*; 172.25.*; 172.26.*; 172.27.*; 172.28.*; 172.29.*; 172.30.*; 172.31.*; 192.168.*; <local>"
+      },
+      {
+        "stepTitle": "步骤 2：确保分流规则置顶私有 IP 直连",
+        "detail": "在规则 rules 列表最顶部添加：GEOIP,private,DIRECT,no-resolve，让核心直接放行所有本地内网通信。"
+      }
+    ],
+    "faqTips": "如果访问群晖使用的是自建的二级域名（如 nas.myhome.com），请务必在分流规则中将该私有域名显式划为 DIRECT 直连。",
+    "relatedSlugs": [
+      "clash-verge-custom-rules-override",
+      "synology-nas-docker-proxy-download"
+    ]
+  },
+  {
+    "id": "faq-97",
+    "slug": "clash-tun-fake-ip-vs-redir-host",
+    "title": "Fake-IP 与 Redir-Host 模式有什么本质区别？到底该怎么选？",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "从底层原理解析 Clash 两种 DNS 接管模式的优劣势，为你挑选最佳配置方案。",
+    "symptoms": [
+      "不知道在 Clash 设置中该勾选 Fake-IP 还是 Redir-Host",
+      "看到 ping 任何外网域名都返回 198.18.0.x 以为系统中毒中招"
+    ],
+    "rootCauses": [
+      "Fake-IP 模式：本地直接返回一个虚拟 IP（198.18.x.x），真正的 DNS 查询推迟到远端代理节点完成，彻底杜绝本地 DNS 污染，首包响应速度极快！",
+      "Redir-Host 模式：本地必须先拿到目标网站的真实 IP 才能建立代理，在国内易遭 DNS 污染导致连不上"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "结论与推荐：99% 的场景无脑选用「Fake-IP 模式」",
+        "detail": "Fake-IP 是现代科学上网的标准规范。它完全避免了本地向国内运营商询问 Google IP 导致的污染拦截，网页打开速度比 Redir-Host 快 200ms 以上！"
+      },
+      {
+        "stepTitle": "仅在一种情况下使用 Redir-Host：极小众老旧局域网软路由应用",
+        "detail": "只有当你的局域网内存在某些必须校验真实 IP 且对 198.18 虚拟 IP 报错的老旧物联网设备时，才考虑切换回 Redir-Host。"
+      }
+    ],
+    "faqTips": "只要你在电脑上使用 Clash Verge Rev 或 Mihomo Party，保持默认的 Fake-IP 模式就是最强性能。",
+    "relatedSlugs": [
+      "dns-leak-detection-fix",
+      "domestic-speed-slow-when-proxy-on"
+    ]
+  },
+  {
+    "id": "faq-98",
+    "slug": "surge-enhanced-mode-router-gateway",
+    "title": "Surge 网关模式 (Router Gateway) 为全家所有设备托管翻墙方案",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "利用一台闲置的 Mac mini 或日常开机的 Mac 电脑运行 Surge，让全屋电视、音响免装软件翻墙。",
+    "symptoms": [
+      "电视 Apple TV、小天才电话手表、扫地机器人等无法安装代理软件",
+      "不想折腾经常崩溃死机的硬路由固件"
+    ],
+    "rootCauses": [
+      "Surge Mac 版具备顶级的虚拟网络网关能力，可以向局域网广播自己作为主路由网关"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在 Mac 版 Surge 中开启「增强模式」与「网关模式」",
+        "detail": "进入 Surge Mac 偏好设置 -> 勾选「增强模式」，在「网关」选项卡中勾选开启「充当局域网网关与 DHCP 服务器」。"
+      },
+      {
+        "stepTitle": "步骤 2：在目标设备上修改网关与 DNS 指向 Mac 的 IP",
+        "detail": "例如将 Apple TV 的 IPv4 设为手动，IP 填 192.168.1.50，子网掩码 255.255.255.0，路由器/网关填 Mac 的 IP（192.168.1.88），DNS 填 192.168.1.88 即可！"
+      }
+    ],
+    "faqTips": "Surge 网关模式极其稳定且具备可视化的全设备流量抓包面板，是果粉家庭网络的终极形态。",
+    "relatedSlugs": [
+      "apple-tv-tvos-surge-clash-proxy",
+      "lan-share-proxy-switch-ps5-xbox"
+    ]
+  },
+  {
+    "id": "faq-99",
+    "slug": "adguard-home-clash-dns-coexistence",
+    "title": "AdGuard Home 去广告与 Clash 分流 DNS 完美共存架构设计",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "6 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "家庭极客搭建全屋去广告与智能科学上网时，避免 DNS 互相争抢端口与死循环回环的标准拓扑图。",
+    "symptoms": [
+      "同时开启 AdGuard Home 和 Clash 后，全家设备无法上网",
+      "日志显示 53 端口冲突或 DNS queries loop",
+      "广告被拦截了但翻墙失效，或者翻墙正常但广告拦截失效"
+    ],
+    "rootCauses": [
+      "两者在处理 DNS 请求时形成首尾相接的无限死循环"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "黄金架构：客户端 -> AdGuard Home (去广告) -> Clash (智能分流) -> 公网",
+        "detail": "让设备把 DNS 查询先交给 AdGuard Home（过滤广告规则与跟踪脚本），过滤后的干净请求再作为上游交给 Clash 进行智能出海分流。"
+      },
+      {
+        "stepTitle": "步骤 2：端口精细化配置",
+        "detail": "将 AdGuard Home 监听在系统标准 53 端口上；将 Clash 内置 DNS 监听在非标端口 1053 上。在 AdGuard Home 的上游 DNS 中填入 127.0.0.1:1053 即可。"
+      }
+    ],
+    "faqTips": "这种分工明确的链路架构既能享受到秒级无广告的清爽网页，又能保证境外流量精准分流。",
+    "relatedSlugs": [
+      "dns-leak-detection-fix",
+      "openwrt-openclash-double-routing-crash"
+    ]
+  },
+  {
+    "id": "faq-100",
+    "slug": "tailscale-wireguard-clash-conflict",
+    "title": "Tailscale / ZeroTier 虚拟组网与 Clash TUN 模式路由冲突排查",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "远程办公时同时使用 Tailscale/WireGuard 组网工具和科学上网，导致无法访问公司内网的解决。",
+    "symptoms": [
+      "开启 Clash TUN 后，原本可以连通的远程 NAS 或公司服务器 (100.x.x.x) 突然全部 ping 不通",
+      "Tailscale 图标频繁黄灯提示 reconnecting",
+      "关掉 Clash 后远程连接立即恢复"
+    ],
+    "rootCauses": [
+      "Clash 的 TUN 模式默认创建了一条覆盖全局 0.0.0.0/0 的默认路由，其跃点数 (Metric) 高于 Tailscale 虚拟网卡，强行捕获了组网流量"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：将 Tailscale 虚拟网段排除在 TUN 之外",
+        "detail": "在 Clash 的 tun 配置中，使用 route-exclude-address 显式排除 CGNAT 组网保留网段 100.64.0.0/10。",
+        "code": "tun:\n  enable: true\n  stack: mixed\n  route-exclude-address:\n    - 100.64.0.0/10\n    - 192.168.0.0/16"
+      },
+      {
+        "stepTitle": "步骤 2：在分流规则中设置 Tailscale 节点直连",
+        "detail": "在 rules 中追加：IP-CIDR,100.64.0.0/10,DIRECT,no-resolve，让组网打洞流量直接原路返回。"
+      }
+    ],
+    "faqTips": "排除后，外网科学上网走高速专线，公司与家里设备互通走 Tailscale P2P 直连，二者互不干扰。",
+    "relatedSlugs": [
+      "bypass-private-lan-ip-clash",
+      "clash-tun-mode-virtual-nic-fail"
+    ]
+  },
+  {
+    "id": "faq-101",
+    "slug": "multi-wan-load-balancing-proxy",
+    "title": "双软路由 / 双宽带叠加环境下的多 WAN 口代理分流高级设置",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "家里同时拉了电信+移动双宽带进行负载均衡叠加时，防止代理连接不断断线重连的策略。",
+    "symptoms": [
+      "网页频繁提示需要重新登录，会话频繁失效",
+      "玩外服游戏时每隔几分钟跳出一次网络异常",
+      "单线程下载速度在两条宽带之间来回震荡"
+    ],
+    "rootCauses": [
+      "多 WAN 负载均衡采用了按数据包 (Per-Packet) 轮询，导致同一个代理 TCP 握手的前后两个包从不同的宽带公网 IP 发出，被机场服务端安全防火墙判定为非法串流而强制断连！"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：将多 WAN 策略修改为「按源与目的 IP 绑定 (Source/Dest IP Hash)」",
+        "detail": "在主路由 MWAN3 策略中，确保将同一台设备发往同一个目的地的连接固定在同一条物理宽带上，杜绝出口 IP 漂移。"
+      },
+      {
+        "stepTitle": "步骤 2：指定所有出境代理流量走质量更优的电信/联通宽带",
+        "detail": "移动宽带晚高峰国际出口丢包高，建议在路由器策略路由中，将所有代理端口 (7890/443) 强制绑定走电信或联通宽带出境。"
+      }
+    ],
+    "faqTips": "双宽带叠加适合国内大文件下载，但对于科学上网和外服联机，稳定的单一出口比盲目叠加更重要。",
+    "relatedSlugs": [
+      "openwrt-openclash-double-routing-crash",
+      "error-connection-reset-by-peer"
+    ]
+  },
+  {
+    "id": "faq-102",
+    "slug": "wechat-bank-app-proxy-risk-control",
+    "title": "手机开着代理登录手机银行或微信支付跳风控预防方案",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "防止手机开着科学上网时打开招商银行、中国银行 App 提示「检测到境外异常登录」的规避攻略。",
+    "symptoms": [
+      "打开手机银行 App 提示风险控制，甚至被强制锁定非柜面交易",
+      "微信支付突然要求重新刷脸人脸识别",
+      "国内政务类 App 提示禁止境外 IP 访问"
+    ],
+    "rootCauses": [
+      "手机客户端开启了全局模式，或者分流规则未收录最新的国内银行与金融结算中心域名，导致鉴权包绕道境外"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：必须开启客户端分流中的「应用分流 / 分应用代理」",
+        "detail": "在安卓版 Clash 或 v2rayNG 中，开启「分应用代理 (Per-App Proxy)」，在列表中仅勾选 Chrome、YouTube、Telegram 等海外软件，将所有国内银行、微信、支付宝彻底排除在代理之外！"
+      },
+      {
+        "stepTitle": "步骤 2：iOS 用户选用智能规则集",
+        "detail": "iOS 小火箭用户确保分流模式为「配置」，且规则集中包含完整的 ChinaMax 白名单，金融金融类直连率 100%。"
+      }
+    ],
+    "faqTips": "敏感金融类软件永远坚持纯原生国内直连，保障资金账户安全无风控。",
+    "relatedSlugs": [
+      "domestic-speed-slow-when-proxy-on",
+      "global-vs-rule-vs-direct-difference"
+    ]
+  },
+  {
+    "id": "faq-103",
+    "slug": "curl-wget-terminal-proxy-environment",
+    "title": "Linux / macOS 终端 curl 和 wget 走代理的 .bashrc 配置全解",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "掌握命令行终端网络环境配置，一键让 bash/zsh 终端命令秒级走通代理的经典配置。",
+    "symptoms": [
+      "终端运行 curl -I https://google.com 报 Failed to connect port 443: Connection refused",
+      "wget 下载海外脚本一直卡在 connecting to server...",
+      "自动化运维脚本在无代理环境下报错失败"
+    ],
+    "rootCauses": [
+      "标准 Unix 终端工具遵守环境变量标准，不会自动读取图形界面的操作系统代理注册表"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在 ~/.bashrc 或 ~/.zshrc 中添加极简开关别名",
+        "detail": "打开终端配置文件并追加以下函数别名：",
+        "code": "alias proxy='export http_proxy=http://127.0.0.1:7890 https_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890 && echo \"Proxy Enabled\"'\nalias unproxy='unset http_proxy https_proxy all_proxy && echo \"Proxy Disabled\"'\nalias myip='curl -L cip.cc'"
+      },
+      {
+        "stepTitle": "步骤 2：执行 proxy 别名并验证当前出口 IP",
+        "detail": "输入 proxy 回车即可开启，随后运行 myip 即可直接查看当前终端出口是否已经变成境外代理 IP。"
+      }
+    ],
+    "faqTips": "此方法适用于 Ubuntu、CentOS、macOS 等所有标准 Unix 环境，简单优雅又可控。",
+    "relatedSlugs": [
+      "pip-conda-npm-proxy-terminal",
+      "git-clone-github-ssh-proxy-config"
+    ]
+  },
+  {
+    "id": "faq-104",
+    "slug": "bilibili-taiwan-hk-unblock-rule",
+    "title": "仅让 B站港澳台限定番剧走代理、普通视频走直连的分流规则配置",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "B站追番党福利：教你如何精准配置分流，只让「仅限港澳台地区」的正版动漫走香港/台湾节点，其余视频全速走国内千兆直连。",
+    "symptoms": [
+      "看 B站番剧提示：非常抱歉，根据版权方要求，您所在的地区无法观看本片",
+      "如果直接开全局代理看 B站，普通国产 UP 主视频加载极其缓慢且弹幕同步卡顿"
+    ],
+    "rootCauses": [
+      "B站只在番剧播放页加载前请求一次地理版权验证 API，而实际的视频推流依然由国内 CDN 承载"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：添加 B站专属智能解锁规则段",
+        "detail": "在客户端规则集中添加以下定向策略，将版权鉴权接口精准导向香港或台湾专线节点：",
+        "code": "rules:\n  # B站港澳台地区版权检测 API 走代理\n  - DOMAIN,api.bilibili.com,🇭🇰 香港专线\n  - DOMAIN,api.bilibili.tv,🇭🇰 香港专线\n  - DOMAIN-SUFFIX,bilibili.com,DIRECT\n  - DOMAIN-SUFFIX,bilivideo.com,DIRECT"
+      },
+      {
+        "stepTitle": "步骤 2：配合油猴脚本「解除 B站区域限制」体验更完美",
+        "detail": "在浏览器安装 Tampermonkey 扩展并安装「解除 B站区域限制」开源脚本，一键实现全自动解锁与 4K 高画质解析。"
+      }
+    ],
+    "faqTips": "这种分流策略只消耗几 KB 的鉴权流量，实际播放走的依然是国内 CDN，既快又完全不费机场流量！",
+    "relatedSlugs": [
+      "bahamut-ani-gamer-taiwan-ip",
+      "clash-verge-custom-rules-override"
+    ]
+  },
+  {
+    "id": "faq-105",
+    "slug": "bypass-steam-epic-game-download",
+    "title": "游戏下载不走代理直接跑满千兆宽带的高级分流技巧 (Steam / Epic)",
+    "category": "routing",
+    "categoryLabel": "系统分流与穿透",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "避免下载几十 GB 的 3A 大作时瞬间吸干机场全部月流量的保姆级规则防坑指南。",
+    "symptoms": [
+      "在 Steam 或 Epic 下载一个《赛博朋克 2077》或《黑神话》，机场 200G 流量一夜之间全部清零",
+      "下载速度只有几 MB/s，没有跑满家里千兆物理宽带"
+    ],
+    "rootCauses": [
+      "客户端开启了全局模式，或者默认规则将所有非 CN 域名统统丢给了代理出口，而 Steam/Epic 的海外 CDN 被误判为境外流量"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在分流规则中将各大游戏下载 CDN 强制绑定 DIRECT 直连",
+        "detail": "在自定义规则顶部添加以下游戏下载域名白名单：",
+        "code": "rules:\n  # Steam / Epic 满速直连下载白名单\n  - DOMAIN-SUFFIX,steamcontent.com,DIRECT\n  - DOMAIN-SUFFIX,steamserver.net,DIRECT\n  - DOMAIN-SUFFIX,epicgames.com,DIRECT\n  - DOMAIN-SUFFIX,gog.com,DIRECT"
+      },
+      {
+        "stepTitle": "步骤 2：在客户端下载设置中选择「中国-上海/北京/广州」下载节点",
+        "detail": "在 Steam 设置 ->「下载」中，将下载地区固定为你所在的国内省份，CDN 自动从腾讯云/阿里机房极速拉取，千兆光纤几分钟下完！"
+      }
+    ],
+    "faqTips": "一定要记住：科学上网节点是用来加速网页浏览、跨越阻断和联机对战的，海量游戏文件下载一定要走国内直连。",
+    "relatedSlugs": [
+      "steam-community-error-101-118",
+      "traffic-drain-fast-background-leaks"
+    ]
+  },
+  {
+    "id": "faq-106",
+    "slug": "subscription-update-error-solutions",
+    "title": "机场订阅更新失败报 500、404 或超时终极排错与备用短链",
+    "category": "subscription",
+    "categoryLabel": "订阅与节点管理",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "详细分析客户端点击刷新订阅时频繁出现 HTTP 500、404、Empty Content 报错的处理方案。",
+    "symptoms": [
+      "点击刷新订阅按钮，弹窗提示：Update subscription failed (status 500 / 404 / 502)",
+      "原有的节点列表瞬间被清空，导致彻底无法上网",
+      "订阅日志显示：response body is not a valid YAML/Base64"
+    ],
+    "rootCauses": [
+      "机场对应的订阅分发域名遭到了国内 DNS 污染或被国家防火墙加入 SNI 阻断黑名单",
+      "用户套餐已经到期或者月流量已完全耗尽，机场后台自动切断了订阅接口的鉴权",
+      "机场主正在维护升级后端数据库或迁移节点服务器"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：第一步登录机场用户中心检查套餐状态",
+        "detail": "使用手机或任意可用网络登录机场后台官网，确认你的会员订阅是否处于「有效 (Active)」状态，确认剩余流量是否大于 0。"
+      },
+      {
+        "stepTitle": "步骤 2：获取机场提供的防封锁「备用订阅链接」",
+        "detail": "很多靠谱机场在用户后台仪表盘提供了「备用节点链接」或支持一键生成免污染短链，复制新链接替换客户端中的旧 URL 即可立即刷新成功。"
+      },
+      {
+        "stepTitle": "步骤 3：在客户端开启「代理状态下更新订阅」",
+        "detail": "只要列表中还有一个能勉强连通的节点，先开启代理，再点击更新订阅。此时请求将由海外节点中转，直接绕过国内所有阻断。"
+      }
+    ],
+    "faqTips": "刷新订阅前建议在客户端右键备份当前的旧配置文件，即使更新失败也不会发生节点全部消失的尴尬局面。",
+    "relatedSlugs": [
+      "shadowrocket-subscription-timeout",
+      "all-nodes-turn-red-suddenly"
+    ]
+  },
+  {
+    "id": "faq-107",
+    "slug": "subconverter-remote-token-leak",
+    "title": "为什么绝不建议用公共在线订阅转换平台？自建订阅转换与防泄露",
+    "category": "subscription",
+    "categoryLabel": "订阅与节点管理",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "揭秘网上免费公共 Subconverter 订阅转换平台的偷节点、盗取 Token 与流量盗刷黑产内幕。",
+    "symptoms": [
+      "使用网上搜到的免费在线订阅转换后，第二天发现机场流量被莫名奇妙消耗了几百 GB",
+      "在异地登录记录中看到来自未知 IP 的大量节点并发连接",
+      "机场后台提示账号因为异常多地并发被系统临时封禁"
+    ],
+    "rootCauses": [
+      "部分不良公共在线订阅转换平台在后端脚本中直接把你的原版订阅链接 (包含 Token 秘钥) 私自记录在数据库中，转手挂到发卡网作为廉价节点池倒卖！"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：优先使用客户端内置的原生转换核心",
+        "detail": "现代客户端（Clash Verge Rev、Mihomo Party、小火箭）均已内置原生的协议转换解析器，直接导入原始订阅即可，完全不需要借助任何第三方外部转换网站！"
+      },
+      {
+        "stepTitle": "步骤 2：如果必须转换，推荐使用本地 Docker 离线自建",
+        "detail": "在本地电脑或私人 NAS 上直接运行官方开源的 subconverter Docker 镜像，转换过程完全在局域网内完成，绝不向外暴露任何 Token。",
+        "code": "docker run -d --name subconverter -p 25500:25500 tindy2013/subconverter:latest"
+      },
+      {
+        "stepTitle": "步骤 3：怀疑泄露时立即在机场后台重置订阅链接",
+        "detail": "如果曾在不明公共转换站粘贴过链接，立即进入机场后台点击「重置订阅链接」，旧 Token 即刻作废，保障账户资产安全。"
+      }
+    ],
+    "faqTips": "把带有完整秘钥的订阅链接粘贴到公共第三方网站，相当于把家门钥匙直接挂在公开论坛上，务必养成良好安全意识。",
+    "relatedSlugs": [
+      "traffic-drain-fast-background-leaks",
+      "how-to-spot-scam-airports"
+    ]
+  },
+  {
+    "id": "faq-108",
+    "slug": "nodes-have-ping-but-cannot-browse",
+    "title": "节点测速延迟几十毫秒但网页打不开的根本原因与排查",
+    "category": "subscription",
+    "categoryLabel": "订阅与节点管理",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "分析为什么测速全部显示低延迟绿灯，但实际访问 Google、YouTube 却连不上的假连通现象。",
+    "symptoms": [
+      "在客户端点击测速，香港节点显示 35ms，日本节点显示 50ms 全部绿油油",
+      "但在浏览器里输入 www.google.com 却一直加载甚至提示无法连接",
+      "测速显示正常但微信外网图片都发不出去"
+    ],
+    "rootCauses": [
+      "所谓的 35ms 只是客户端到机场「国内中继/入口服务器」的 TCP Ping 延迟，并不代表从入口机房到境外落地节点之间的全链路通畅！",
+      "机场的境外落地机器被封锁或后端代理服务已经宕机，但国内入口服务器依然在正常坚挺回复 Ping 探测报文（典型的空包中继）",
+      "本地 Windows 系统代理开关未真正开启，浏览器根本没有将请求发给 Clash"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：排查系统代理是否真正生效",
+        "detail": "按 Win + I 打开 Windows 设置 ->「网络和 Internet」->「代理」，检查「使用代理服务器」是否已开启，地址是否指向 127.0.0.1:7890。"
+      },
+      {
+        "stepTitle": "步骤 2：在客户端内切换真实的测速 URL",
+        "detail": "将客户端的测试地址改为一个真正的端到端境外网页，例如 http://www.google.com/generate_204，这种端到端测试才能准确反映全链路是否真正通畅。"
+      },
+      {
+        "stepTitle": "步骤 3：选用真正全节点直通的 IPLC 纯专线",
+        "detail": "公网中继容易出现入口好、出口断的假冒伪劣现象；认准真正全链路监控的 IPLC 专线（如隐形人、大佬云）彻底告别假测速。"
+      }
+    ],
+    "faqTips": "记住：低 Ping 只能说明你家到机场入口很近，不等于机场出口能够顺利连接全世界，端到端实际打开网页才是唯一真理。",
+    "relatedSlugs": [
+      "error-dial-tcp-timeout-10000ms",
+      "all-nodes-turn-red-suddenly"
+    ]
+  },
+  {
+    "id": "faq-109",
+    "slug": "all-nodes-turn-red-suddenly",
+    "title": "节点突然全部变红不可用是机场跑路还是节点维护？如何准确鉴别",
+    "category": "subscription",
+    "categoryLabel": "订阅与节点管理",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "手把手教你在 2 分钟内精准鉴别当前是由于遭遇大审查节点临时被拔线、还是机场跑路的四步排查法。",
+    "symptoms": [
+      "今天开机后发现订阅列表里原本好几十个节点全部变红，全部测速超时",
+      "官方 Telegram 群组被开启了全员禁言",
+      "机场官网打不开或者显示 Cloudflare 521/522 错误"
+    ],
+    "rootCauses": [
+      "正常情况：遇到敏感时期或者上游大型机房断电事故，导致多地中继入口同时离线，通常在 2~6 小时内修复",
+      "跑路情况：机场主因低价超售资金链断裂、被上游追缴服务器欠费跑路，或者群组解散官网清空"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：第一步访问机场官方 Telegram 频道（看最新公告）",
+        "detail": "正规靠谱的机场在遇到故障时，都会在第一时间（5~15 分钟内）在 Telegram 官方频道发布通知，说明是机房光纤被挖断还是入口迁移，并给出预计修复时间。"
+      },
+      {
+        "stepTitle": "步骤 2：观察官网主页是否依然存活并能登录后台",
+        "detail": "如果官网依然能正常访问、工单系统可以正常提交，说明大概率只是节点服务器在做紧急容灾迁移，切勿惊慌。"
+      },
+      {
+        "stepTitle": "步骤 3：立即启用你的第二家「备用机场」无缝办公",
+        "detail": "这也是为什么永远要备用一条不同线路机场的原因，立刻切换备用节点，工作与娱乐不受丝毫耽误。"
+      }
+    ],
+    "faqTips": "如果 Telegram 频道被注销、官网直接域名解析不存在超过 24 小时没有任何解释，基本可以确认跑路，建议及时止损。",
+    "relatedSlugs": [
+      "why-never-buy-multi-year-package",
+      "backup-airport-strategy-redundancy"
+    ]
+  },
+  {
+    "id": "faq-110",
+    "slug": "why-never-buy-multi-year-package",
+    "title": "为什么绝不建议购买一次性多年付套餐？防跑路生存法则大揭秘",
+    "category": "subscription",
+    "categoryLabel": "订阅与节点管理",
+    "readTime": "6 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "从机场行业商业逻辑、高防专线成本与法律风险，深度揭秘为什么「月付/季付」是普通用户的最硬核护城河。",
+    "symptoms": [
+      "看到某些新开机场打出「三年付只要 99 元送 500G 专线」的诱人广告蠢蠢欲动",
+      "买了一年付套餐，结果用到第二个月机场就关门大吉失联"
+    ],
+    "rootCauses": [
+      "庞氏超售骗局：新开机场租借廉价月租 VPS，通过极低的多年付预收款迅速吸纳几十万现金，随后一旦服务器到期无力支付高昂的续费账单，机场主直接卷款跑路换皮重新开新站！",
+      "物理专线极高成本：正规合规的 IPLC 物理专线每个 Gbps 带宽每个月的成本高达数万元，绝不可能有「三年几十块钱」还能保证高峰期稳定不卡顿的物理逻辑！"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "黄金铁律 1：初次尝试任何新机场，必须且只买「月付」",
+        "detail": "即使年付折扣再诱人，首次体验也必须先买一个月付套餐，在晚上 8~10 点的晚高峰真实检验其 4K 播放与丢包表现。"
+      },
+      {
+        "stepTitle": "黄金铁律 2：即使是运营 3 年以上的老牌机场，最多只买「年付」",
+        "detail": "对口碑极佳的老品牌，购买年付享受 8 折优惠是合情合理的，但坚决不要碰任何「两年付、三年付、永久传家宝」套餐！"
+      }
+    ],
+    "faqTips": "记住：你在意的是他那点超额折扣，不良机场主盯上的却是你的全部本金！保持月付/季付，永远拥有随时用脚投票的自由。",
+    "relatedSlugs": [
+      "how-to-spot-scam-airports",
+      "backup-airport-strategy-redundancy"
+    ]
+  },
+  {
+    "id": "faq-111",
+    "slug": "airport-vs-self-built-vps-comparison",
+    "title": "机场节点与自己买海外 VPS 搭建科学上网深度横评 (谁更稳定划算？)",
+    "category": "subscription",
+    "categoryLabel": "订阅与节点管理",
+    "readTime": "6 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "从金钱成本、抗封锁能力、晚高峰带宽、维护时间与流媒体解锁等 5 大维度，全面对比自建与专业机场的优劣。",
+    "symptoms": [
+      "纠结是自己买搬瓦工、Linode、Oracle 搭建，还是直接购买成熟的机场专线服务",
+      "自建 VPS IP 经常被墙，换一次 IP 要花 8 美元心力交瘁"
+    ],
+    "rootCauses": [
+      "个人自建通常只能买到普通公网直连 VPS，走公网国际出口，晚高峰受到严重丢包压制，且单个 IP 一旦被防火墙识别就是 100% 彻底报废；而专业机场拥有多入口 BGP 智能调度、内网 IPLC 物理专线与几百台落地机组成的强大容灾矩阵。"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "维度 1：晚高峰速度与抗审查（机场完胜）",
+        "detail": "个人买不起动辄每月几万元的商业 IPLC 专线，自建直连一到特殊时期或晚高峰就断流；专业机场走物理专线不过墙，稳如泰山。"
+      },
+      {
+        "stepTitle": "维度 2：流媒体与 AI 解锁（机场完胜）",
+        "detail": "自建机房 IP（如 DigitalOcean）100% 被 OpenAI 和 Netflix 识别阻断；机场配置了专门的原生家宽池进行动态分流解锁。"
+      },
+      {
+        "stepTitle": "维度 3：性价比与时间成本（机场完胜）",
+        "detail": "自建 VPS 最便宜也要 $5/月 (约 ¥35)，还要自己折腾代码、对付被墙；而同等价位已能购买顶级 IPLC 专线机场，省去无数折腾时间。"
+      }
+    ],
+    "faqTips": "结论：除非有特定的海外私有独立固定 IP 或远程服务器运维需求，日常查资料、看视频、用 AI，直接选优质专线机场在各方面均呈碾压之势。",
+    "relatedSlugs": [
+      "why-never-buy-multi-year-package",
+      "iplc-vs-iepl-technical-difference"
+    ]
+  },
+  {
+    "id": "faq-112",
+    "slug": "traffic-drain-fast-background-leaks",
+    "title": "为什么机场流量消耗异常飞快？排查后台偷跑流量的元凶",
+    "category": "subscription",
+    "categoryLabel": "订阅与节点管理",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "明明没看几个视频，几天内 100G 流量就见了底？全面排查系统后台自动偷跑境外流量的黑手。",
+    "symptoms": [
+      "刚买的月付 200GB 套餐，才用了一个星期后台就提示流量只剩 10%",
+      "手机或电脑即使静置未操作，客户端连接日志仍然在持续跳动几十 KB/s 的上传下载"
+    ],
+    "rootCauses": [
+      "误开启了「全局代理 (Global)」，导致国内百度网盘下载、Steam 游戏更新、迅雷 P2P 全部走了代理",
+      "网盘类软件（iCloud、OneDrive、Google Drive、Dropbox）在后台疯狂同步相册与大文件",
+      "在节点列表中长时间使用了 3.0x 或 5.0x 的高倍率节点进行大文件下载"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：排查并确保处于「规则模式 (Rule)」",
+        "detail": "在客户端中核实当前处于规则模式，杜绝国内大流量软件消耗境外配额。"
+      },
+      {
+        "stepTitle": "步骤 2：检查当前连接的节点倍率",
+        "detail": "注意节点名称后是否标注了「x3.0」或「x5.0」等倍率标识。如果在 3 倍率节点下看了一个 10GB 的 4K 电影，实际扣除的流量是 30GB！日常看长视频建议选用 1.0x 或 0.5x 经济节点。"
+      },
+      {
+        "stepTitle": "步骤 3：在客户端连接面板中按「下载流量」排序排查",
+        "detail": "在 Clash Verge Rev 的「连接 (Connections)」面板中，点击「下载」列头降序排列，一眼抓出是哪个进程（如 OneDrive.exe）正在疯狂消耗流量，并将其单独划为直连。"
+      }
+    ],
+    "faqTips": "如果使用了公共在线订阅转换，也可能是 Token 泄露被他人盗刷，必要时在机场后台点击重置订阅。",
+    "relatedSlugs": [
+      "subconverter-remote-token-leak",
+      "node-multiplier-billing-explained"
+    ]
+  },
+  {
+    "id": "faq-113",
+    "slug": "how-to-spot-scam-airports",
+    "title": "如何在 3 分钟内识别虚假宣传、随时跑路的野鸡机场？",
+    "category": "subscription",
+    "categoryLabel": "订阅与节点管理",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "掌握科学上网老鸟的「照妖镜」法则，快速识破虚标专线与即将跑路野鸡站的四大破绽。",
+    "symptoms": [
+      "在某些不知名论坛或小红书看到有人疯狂刷屏推广某家极其便宜的机场",
+      "界面粗制滥造，没有任何官方说明文档"
+    ],
+    "rootCauses": [
+      "野鸡机场通常是一两个人使用免费开源面板（如 V2board、SSPanel）搭建，租用几台超售小鸡，以低价为饵圈一波钱就跑"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "破绽 1：价格违背物理常识（几块钱号称无限流量 IPLC 专线）",
+        "detail": "IPLC 物理专线是实打实的昂贵商业带宽，如果一家机场号称「9.9 元一个月不限流量全专线」，100% 是用廉价普通公网直连挂羊头卖狗肉的虚标货！"
+      },
+      {
+        "stepTitle": "破绽 2：查域名的 Whois 注册时间",
+        "detail": "通过 whois.chinaz.com 查询其官网域名注册时间。如果域名才刚注册不到 1 个月，必须保持高度警惕，绝不买长期套餐。"
+      },
+      {
+        "stepTitle": "破绽 3：看 Telegram 官方社群的活跃度与氛围",
+        "detail": "正规老牌机场群内有上千活跃真实用户交流技术，管理团队态度专业；野鸡机场群内往往全员禁言，或者只有几个机器人自导自演发好评。"
+      }
+    ],
+    "faqTips": "认准经过长期监控实测、口碑积累 2~3 年以上的老牌团队（如本站实测推荐的 14 个品牌）是避开跑路的最省心方案。",
+    "relatedSlugs": [
+      "why-never-buy-multi-year-package",
+      "all-nodes-turn-red-suddenly"
+    ]
+  },
+  {
+    "id": "faq-114",
+    "slug": "airport-telegram-group-safety-tips",
+    "title": "机场 Telegram 交流群防被骗、防隐私泄露与群规常识",
+    "category": "subscription",
+    "categoryLabel": "订阅与节点管理",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "进入机场官方 TG 交流群时防止遭遇假客服私信诈骗、隐藏手机号防开盒的安全守则。",
+    "symptoms": [
+      "刚进群在群里提问了一句「节点连不上」，立刻有头像和名字一模一样的高仿管理人员私信你要求发订阅链接或微信扫码转账",
+      "Telegram 账号无故被盗或收到境外骚扰电话"
+    ],
+    "rootCauses": [
+      "骗子长期潜伏在大型机场群组内，使用自动化脚本监控带问号的提问，随后高仿官方头像实施私信诈骗；TG 默认未隐藏 +86 手机号导致真实身份泄露"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：第一步在 TG 隐私设置中彻底隐藏手机号",
+        "detail": "打开 Telegram「Settings」->「Privacy and Security」->「Phone number」-> 选择「Nobody (任何人不可见)」，下方的「谁能通过手机号找到我」设为「My Contacts」。"
+      },
+      {
+        "stepTitle": "步骤 2：牢记铁律：任何主动私信你的所谓「管理员/客服」100% 是骗子！",
+        "detail": "正规机场官方管理团队绝不会主动私信任何普通用户索要密码、订阅链接或要求额外转账。遇到主动私信直接点击 Report Spam 并拉黑屏蔽。"
+      },
+      {
+        "stepTitle": "步骤 3：群内严禁发送完整的订阅 URL 截图",
+        "detail": "截图提问时必须用马赛克完全遮挡住你的订阅 URL 和二维码，防止他人盗取你的节点配额。"
+      }
+    ],
+    "faqTips": "遇到技术故障，优先在机场官网提交正规 Support Ticket（支持工单），这是最安全、最直接的官方通道。",
+    "relatedSlugs": [
+      "subconverter-remote-token-leak",
+      "telegram-connecting-updating-loop"
+    ]
+  },
+  {
+    "id": "faq-115",
+    "slug": "subscription-link-custom-user-agent",
+    "title": "机场屏蔽默认客户端 UA 导致订阅无法更新的自定义 UA 技巧",
+    "category": "subscription",
+    "categoryLabel": "订阅与节点管理",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "解决部分机场服务端为了防爬虫恶意刷接口，屏蔽了部分小众客户端 User-Agent 的技巧。",
+    "symptoms": [
+      "同一个订阅链接在手机小火箭里更新正常，但在电脑特定客户端里更新直接报 403 Forbidden",
+      "控制台提示：User-Agent blocked by server"
+    ],
+    "rootCauses": [
+      "机场服务端的安全防火墙配置了 UA 过滤白名单，未将部分新兴或小众客户端的默认请求头纳入其中"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在客户端订阅设置中自定义 User-Agent",
+        "detail": "进入 Clash Verge Rev ->「订阅」-> 右键该订阅选择「编辑配置」-> 找到「User-Agent」输入框，填入标准的通用小火箭或 Clash UA：",
+        "code": "# 推荐伪装的通用标准 UA：\nClashMeta\n或\nShadowrocket/1990 CFNetwork/1410.0.3 Darwin/22.6.0"
+      },
+      {
+        "stepTitle": "步骤 2：保存并再次点击更新订阅",
+        "detail": "修改 UA 保存后，服务端会将请求识别为标准的小火箭或官方 Clash，立即放行订阅数据下发。"
+      }
+    ],
+    "faqTips": "自定义 UA 是解决各类客户端订阅导入报 403 错误的杀手锏秘籍。",
+    "relatedSlugs": [
+      "subscription-update-error-solutions",
+      "shadowrocket-subscription-timeout"
+    ]
+  },
+  {
+    "id": "faq-116",
+    "slug": "node-multiplier-billing-explained",
+    "title": "机场节点倍率（0.5x、1.0x、3.0x、5.0x）到底是什么意思？如何省流量",
+    "category": "subscription",
+    "categoryLabel": "订阅与节点管理",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "搞懂节点倍率的真实扣费逻辑，教你如何用同等套餐看双倍时长的 4K 视频。",
+    "symptoms": [
+      "看到节点名字后面带有 0.1x、0.5x、1.0x、3.0x 不知该怎么选",
+      "用了几天 3.0x 节点，后台流量直接飞快蒸发"
+    ],
+    "rootCauses": [
+      "倍率是机场对不同成本路线的定价杠杆：实际扣除流量 = 你的真实物理流量 × 节点倍率"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "倍率类型 1：0.5x / 0.8x 经济型节点 —— 刷视频与大下载首选",
+        "detail": "你实际下载了 10GB 视频，后台只从你账户中扣除 5GB 流量！非常适合追剧、挂机下载或轻度刷网页，相当于流量凭空翻倍！"
+      },
+      {
+        "stepTitle": "倍率类型 2：1.0x 标准型节点 —— 日常主力平衡之选",
+        "detail": "实打实的 1:1 扣费，通常是机场性价比最高的普通专线线路，性能与消耗最均衡。"
+      },
+      {
+        "stepTitle": "倍率类型 3：3.0x / 5.0x 旗舰高防专线 —— 重要商务与电竞专享",
+        "detail": "走最昂贵、成本最高的金融级专网，通常延迟极低且全天 0 丢包。适合重要越洋电话会议、关键考试抢票或游戏排位赛，日常看长视频切勿常驻使用。"
+      }
+    ],
+    "faqTips": "平时看 YouTube 推荐挂 0.5x~1.0x 节点，重要生产力时刻切 3.0x 极速专线，精打细算最聪明。",
+    "relatedSlugs": [
+      "traffic-drain-fast-background-leaks",
+      "why-never-buy-multi-year-package"
+    ]
+  },
+  {
+    "id": "faq-117",
+    "slug": "backup-airport-strategy-redundancy",
+    "title": "双机场冷备与热备策略：如何搭建永不失联的网络高可用容灾体系",
+    "category": "subscription",
+    "categoryLabel": "订阅与节点管理",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "外贸办公、跨境出海与科研刚需用户必备的容灾冗余体系搭建指南。",
+    "symptoms": [
+      "主力机场突然遇到上游机房故障维护 2 小时，手头正在进行的跨国商务会议被紧急打断",
+      "手里只有一家机场，一旦出问题就彻底两眼一抹黑"
+    ],
+    "rootCauses": [
+      "任何网络服务（哪怕是微软、亚马逊云）都有 99.9% 之外的那 0.1% 故障率，单点依赖是所有生产力崩溃的根源"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "黄金组合方案：「一条主力包月专线」+「一个不限时长按量计费包」",
+        "detail": "日常主力选择稳定、大带宽的高质量包月专线（如隐形人或大佬云）；同时购买一个几块钱或几十块钱、流量永久不过期的「不限时按量计费套餐」（如无忧链接或时空立方）作为常驻备用。"
+      },
+      {
+        "stepTitle": "步骤 2：在客户端中将两家订阅同时导入",
+        "detail": "在 Clash Verge Rev 中同时勾选两家订阅，在同一个节点列表中即可看到两家机场的所有节点，主力遇到维护瞬间无缝切换备用，整个团队工作完全不中断！"
+      }
+    ],
+    "faqTips": "按量计费的备用包平时不用一分钱不扣，关键时刻就是救命稻草，是每个专业选手的标配。",
+    "relatedSlugs": [
+      "why-never-buy-multi-year-package",
+      "all-nodes-turn-red-suddenly"
+    ]
+  },
+  {
+    "id": "faq-118",
+    "slug": "airport-reset-traffic-billing-cycle",
+    "title": "机场每月流量重置日期与按周期结账常见误区澄清",
+    "category": "subscription",
+    "categoryLabel": "订阅与节点管理",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "搞清楚你的流量到底是在自然月 1 号重置，还是在每次扣款账单日重置的防超额常识。",
+    "symptoms": [
+      "以为每个月 1 号会自动刷新 200G 流量，结果 1 号打开依然提示流量耗尽",
+      "不知道自己剩余流量还有几天有效"
+    ],
+    "rootCauses": [
+      "大部分机场采用「订单周期重置制」而非「自然月制」：如果你是在 1 月 18 日购买的月付套餐，流量重置时间是每月的 18 日，而不是 2 月 1 日！"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在机场后台查看「下一次重置日期 (Next Reset Date)」",
+        "detail": "登录机场用户仪表盘，在流量圆环图下方明确标注了精确到小时的重置时间戳。"
+      },
+      {
+        "stepTitle": "步骤 2：流量见底但距离重置还有多天的应急方案",
+        "detail": "如果提前耗尽了流量，正规机场后台通常提供「提前重置流量包」或「临时充值附加流量包」，花费几元钱即可立即刷新本月配额，无需重复购买新套餐。"
+      }
+    ],
+    "faqTips": "合理规划每月的下载和看剧配额，避免在账单周期最后几天出现断粮尴尬。",
+    "relatedSlugs": [
+      "node-multiplier-billing-explained",
+      "traffic-drain-fast-background-leaks"
+    ]
+  },
+  {
+    "id": "faq-119",
+    "slug": "speedtest-bandwidth-waste-warning",
+    "title": "为什么在机场测速测几十次会导致几十上百G流量瞬间蒸发？",
+    "category": "subscription",
+    "categoryLabel": "订阅与节点管理",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "科普 Speedtest 与一键全节点跑分脚本的流量黑洞真相，告别无意义的测速焦虑。",
+    "symptoms": [
+      "用测速脚本把列表里的 50 个节点挨个跑了一遍测速，回头一看后台发现蒸发了 80GB 流量"
+    ],
+    "rootCauses": [
+      "Speedtest 测速的物理原理：为了测出你的极限带宽，客户端会向境外服务器并发拉取海量垃圾数据包并塞满整个千兆通道。在 1000M 宽带下，测一个节点短短 15 秒钟就要消耗 1.5GB~2GB 的真实物理流量！测试 50 个节点，直接消耗 100GB 流量！"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：杜绝高频全量跑分，日常使用以延迟测试为主",
+        "detail": "在客户端点击闪电图标（仅发送几字节的 Ping 握手包探测毫秒延迟），这种延迟测试几乎完全不消耗任何流量。"
+      },
+      {
+        "stepTitle": "步骤 2：用真实使用场景检验，替代冷冰冰的跑分",
+        "detail": "只要打开 YouTube 4K 视频能秒开、拖拽进度条不卡顿，就说明当前节点带宽完全充沛，毫无必要专门去跑满速测速浪费流量。"
+      }
+    ],
+    "faqTips": "流量是买来看视频办公的，不是拿来给测速服务器刷数据的，克制测速瘾是省流量第一步。",
+    "relatedSlugs": [
+      "traffic-drain-fast-background-leaks",
+      "nodes-have-ping-but-cannot-browse"
+    ]
+  },
+  {
+    "id": "faq-120",
+    "slug": "airport-refund-policy-chargeback",
+    "title": "机场购买后无法使用能否退款？工单协商与争议申诉指南",
+    "category": "subscription",
+    "categoryLabel": "订阅与节点管理",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "遇到新买的机场完全连不上或服务质量严重与宣传不符时的正规退款沟通与维权渠道。",
+    "symptoms": [
+      "刚买完发现当地运营商对该机场完全无法连通，要求退款被客服置之不理",
+      "不知道各家服务商的退款保障时间窗口"
+    ],
+    "rootCauses": [
+      "网络代理产品属于数字虚拟商品，大部分机场在服务条款 (ToS) 中明确规定「一经售出概不退款」或仅支持「24 小时内流量未超 5G 无理由退款」"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：仔细阅读该机场的服务条款 (ToS) 与退款政策",
+        "detail": "查看官网底部的 Terms of Service，确认其是否提供 24 小时或 3 天内的退款保障期。"
+      },
+      {
+        "stepTitle": "步骤 2：礼貌提交详细工单 (Ticket) 进行协商",
+        "detail": "在工单中详细描述本地测试情况（附带 ping 截图和客户端日志），说明由于本地网络特殊原因确实无法连接，申请原路退回或退回站内余额。"
+      },
+      {
+        "stepTitle": "步骤 3：防范风险的最好办法永远是「先买月付」",
+        "detail": "花十几块钱买月付即使遇到水土不服损失也极小，切勿一上来就为了省几块钱买大几百的年付。"
+      }
+    ],
+    "faqTips": "正规老牌机场对于合理的用户技术原因退款通常支持工单扣除少量手续费原路退还，购买前认准信誉品牌最关键。",
+    "relatedSlugs": [
+      "why-never-buy-multi-year-package",
+      "how-to-spot-scam-airports"
+    ]
+  },
+  {
+    "id": "faq-121",
+    "slug": "shadowsocks-vs-trojan-vs-vless",
+    "title": "Shadowsocks、Trojan、Vless 协议本质区别与适用场景横评",
+    "category": "protocols",
+    "categoryLabel": "底层协议技术",
+    "readTime": "6 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "从密码学原理、抗审查机制和运行性能开销，深度拆解三大主流代理协议的技术内核。",
+    "symptoms": [
+      "面对节点列表中琳琅满目的 SS、Trojan、Vless 协议不知道它们有什么区别",
+      "不知道哪种协议在晚高峰看 4K 速度最快、延迟最低"
+    ],
+    "rootCauses": [
+      "不同协议诞生的时代背景和设计目标不同：Shadowsocks 追求极致轻量无握手延迟；Trojan 追求完美模拟标准 HTTPS 伪装；Vless 追求轻量无状态与模块化解耦"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "协议 1：Shadowsocks (SS) —— 专线环境下的性能之王",
+        "detail": "设计极其纯粹，没有复杂的多层包装，直接采用高效的对称加密（如 AEAD-2022 / AES-128-GCM）。在走内网 IPLC 专线时，SS 的加解密开销最低、CPU 占用最小、延迟最低，是打游戏和看 4K 跑分的首选！"
+      },
+      {
+        "stepTitle": "协议 2：Trojan —— 经典 HTTPS 伪装者",
+        "detail": "直接伪装成标准的互联网 HTTPS 网页流量（监听 443 端口并配置真实 SSL 证书）。防火墙看它就像普通网购或查资料，在公网直连或普通隧道中继下具有极高的存活率。"
+      },
+      {
+        "stepTitle": "协议 3：Vless (搭配 Reality) —— 新一代抗审查天花板",
+        "detail": "本身不包含冗余加密逻辑，完全依托底层传输层（如 TLS 1.3）保障安全，结合 Reality 技术借用海外真实大厂证书，完全不需要自己申请域名，是当前公网抗阻断的最强形态。"
+      }
+    ],
+    "faqTips": "如果你的机场走的是纯 IPLC 专线，优先选 Shadowsocks 性能最爆棚；如果走公网中继，优先选 Trojan 或 Vless。",
+    "relatedSlugs": [
+      "vless-reality-anti-censorship-how-it-works",
+      "hysteria-2-udp-protocol-deep-dive"
+    ]
+  },
+  {
+    "id": "faq-122",
+    "slug": "hysteria-2-udp-protocol-deep-dive",
+    "title": "Hysteria 2 协议为什么弱网起飞快？底层原理与劣势全方位剖析",
+    "category": "protocols",
+    "categoryLabel": "底层协议技术",
+    "readTime": "6 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "深入解读基于魔改 QUIC / UDP 的 Hysteria 2 (歇斯底里) 协议如何在丢包 30% 环境下跑满百兆宽带的秘密。",
+    "symptoms": [
+      "在某些极其劣化的弱网 Wi-Fi 下，普通 TCP 节点全部断流，而 Hysteria 2 却能流畅看 1080P",
+      "晚高峰个别地区运营商对 Hysteria 2 出现限速"
+    ],
+    "rootCauses": [
+      "传统 TCP 协议遇到丢包会触发「拥塞避免机制」，自动将发送窗口减半并等待重传，导致速率暴跌；而 Hysteria 2 基于 UDP 构建，采用了专有的 Brutal 拥塞控制算法，即使公网存在 20%~30% 的丢包，依然以恒定目标速率持续发包，配合前向纠错 (FEC)，实现逆风起飞！"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "优势：弱网与跨国高丢包线路的绝对救星",
+        "detail": "在校园网、移动 4G/5G 弱信号、或晚高峰普通公网中继遭遇恶劣丢包时，Hysteria 2 能让网页秒开、视频无感加载。"
+      },
+      {
+        "stepTitle": "劣势与对策：注意运营商对 UDP 的 QoS 限制",
+        "detail": "部分地区运营商由于讨厌这种暴力发包行为，在晚高峰会对 UDP 实施严厉的单向限速。遇到此类情况，开启 Hysteria 2 的「端口跳跃 (Port Hopping)」或切换回 TCP IPLC 专线即可化解。"
+      }
+    ],
+    "faqTips": "Hysteria 2 是近年来代理协议领域最具颠覆性的技术突破之一，暮光加速、微风网络等主流品牌已全面标配支持。",
+    "relatedSlugs": [
+      "error-hysteria2-udp-rate-limit",
+      "tuic-protocol-quic-advantages"
+    ]
+  },
+  {
+    "id": "faq-123",
+    "slug": "vless-reality-anti-censorship-how-it-works",
+    "title": "Vless-Reality 借用大厂证书原理：为什么它号称当前最强抗封锁",
+    "category": "protocols",
+    "categoryLabel": "底层协议技术",
+    "readTime": "6 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "揭秘 Xray 团队创造的 Reality 协议如何彻底告别域名购买与证书申请，实现真假难辨的完美伪装。",
+    "symptoms": [
+      "听说 Reality 协议很强，但不知道它是如何做到不买域名、不申请证书却拥有最高等级安全加密的"
+    ],
+    "rootCauses": [
+      "传统伪装协议（Trojan / VMess+TLS）必须由机场主购买域名并向 Let's Encrypt 申请 SSL 证书，审查系统只要顺藤摸瓜查询证书颁发历史和域名解析，就能轻易发现猫腻；而 Reality 彻底打破了这一模式。"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "核心机理 1：偷天换日借用大厂真实证书 (SNI Borrowing)",
+        "detail": "Reality 节点的服务端在握手时直接借用苹果 (apple.com)、微软 (microsoft.com) 或雅虎等真正全球科技巨头的正规合法证书。审查系统在探测时，拿到的就是苹果官方的真证书，完全无法封锁！"
+      },
+      {
+        "stepTitle": "核心机理 2：独创的 ShortID 与客户端私钥身份校验",
+        "detail": "只有持正确 ShortID 秘钥的真实客户端发出的请求，服务端才会接纳并解密代理流量；而如果是防火墙发出的主动嗅探探测，服务端会直接原封不动地将流量透传转发给真正的苹果官网，彻底迷惑防火墙！"
+      }
+    ],
+    "faqTips": "Reality 真正实现了从逻辑层面免疫 GFW 的主动探测识别，是目前公网代理最先进的技术形态。",
+    "relatedSlugs": [
+      "error-502-bad-gateway-reality",
+      "shadowsocks-vs-trojan-vs-vless"
+    ]
+  },
+  {
+    "id": "faq-124",
+    "slug": "tuic-protocol-quic-advantages",
+    "title": "TUIC 协议基于标准 QUIC 的性能优势与高丢包线路测试对比",
+    "category": "protocols",
+    "categoryLabel": "底层协议技术",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "分析基于 IETF 标准 QUIC 协议构建的 TUIC 协议在 0-RTT 握手、多路复用与头部阻塞消除上的技术亮点。",
+    "symptoms": [
+      "客户端支持 TUIC 协议，想知道它与 Hysteria 2 和传统 TCP 相比有何区别"
+    ],
+    "rootCauses": [
+      "传统 TCP 协议存在「队头阻塞 (Head-of-Line Blocking)」问题，一个数据包丢了整个连接都要停下来等待重传；而基于 QUIC 的 TUIC 在单个 UDP 连接内实现了完全独立的并发流，互不影响！"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "优势 1：0-RTT 极速握手连接",
+        "detail": "对于曾经建立过连接的服务端，TUIC 支持 0-RTT 直接发送应用层数据，点开网页的瞬间无需等待任何三次握手，首包延迟达到物理极限。"
+      },
+      {
+        "stepTitle": "优势 2：天然模拟 HTTP/3 合法流量",
+        "detail": "TUIC 严格遵守 IETF 官方 QUIC 规范标准，在公网线路上表现为极其标准的合规 HTTP/3 流量，比激进发包的协议更具隐蔽性。"
+      }
+    ],
+    "faqTips": "Sing-box 核心对 TUIC 提供了原生的顶级支持，搭配优质落地机使用体验非常出色。",
+    "relatedSlugs": [
+      "hysteria-2-udp-protocol-deep-dive",
+      "error-quic-blocked-fallback-tcp"
+    ]
+  },
+  {
+    "id": "faq-125",
+    "slug": "vmess-vs-vless-why-deprecated",
+    "title": "为什么主流机场正逐步淘汰 VMess 协议？技术架构进化深度解析",
+    "category": "protocols",
+    "categoryLabel": "底层协议技术",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "回顾翻墙协议历史，详解为什么统治一时的 VMess 正在被更轻量安全的 Vless 全面取代。",
+    "symptoms": [
+      "发现新买的机场订阅里 VMess 协议越来越少，全变成了 Vless、Trojan 和 SS"
+    ],
+    "rootCauses": [
+      "VMess 协议由 V2Ray 团队在多年前设计，为了在未加密的公网中传输，设计了复杂的对称加密与严格的时间戳机制。随着互联网全面普及 TLS 1.3，VMess 内部的重复加密造成了严重的 CPU 算力浪费，且历史实现曾出现过被学术论文披露的认证漏洞"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "Vless 的革命性精简：去掉双重加密",
+        "detail": "Vless (VMess Less) 顾名思义就是「去掉了多余包袱的 VMess」。它不依赖死板的 90 秒时间对齐，完全将加密工作托付给外层的标准 TLS/Reality，握手开销降低 50% 以上。"
+      },
+      {
+        "stepTitle": "协议演进历程：SS -> VMess -> Vless/Trojan -> Reality/Hysteria2",
+        "detail": "机场行业正在完成新一轮协议技术换代，逐步淘汰老旧复杂的 VMess 是提升全网并发吞吐的必然结果。"
+      }
+    ],
+    "faqTips": "老旧客户端如果不支持 Vless，建议尽快迁移至活跃维护的 Clash Verge Rev 或 Sing-box。",
+    "relatedSlugs": [
+      "error-clock-skew-system-time",
+      "shadowsocks-vs-trojan-vs-vless"
+    ]
+  },
+  {
+    "id": "faq-126",
+    "slug": "gfw-sni-blocking-and-ech-solution",
+    "title": "什么是 SNI 阻断？ECH (Encrypted Client Hello) 如何对抗审查机制",
+    "category": "protocols",
+    "categoryLabel": "底层协议技术",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "科普现代网络审查的核心杀手锏「SNI 嗅探阻断」原理，以及下一代技术 ECH 的抗审查曙光。",
+    "symptoms": [
+      "访问部分未完全被封锁 IP 的网站，刚发起 HTTPS 握手瞬间就被直接切断"
+    ],
+    "rootCauses": [
+      "在标准 HTTPS TLS 握手最开始的 Client Hello 阶段，客户端必须发送 SNI (Server Name Indication) 告诉服务器自己要访问哪个域名。这一步在传统 TLS 1.3 中是完全「明文」的！GFW 只要在主干网嗅探到包含 youtube.com 等明文字符，立刻发送 RST 实施阻断！"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "当前解决方案：代理协议在本地先进行全套加密封装",
+        "detail": "客户端通过 Shadowsocks/Vless 将整个 TLS 握手包整体作为内层载荷加密后再发给境外节点，GFW 看到的只是一串随机乱码，根本看不到里面的真实 SNI。"
+      },
+      {
+        "stepTitle": "未来终极方案：ECH (加密客户端问候) 协议原生普及",
+        "detail": "IETF 推动的 ECH 标准通过将初始 SNI 利用公钥在 DNS 层完成预加密，未来即使不通过代理，明文阻断也将彻底成为历史。"
+      }
+    ],
+    "faqTips": "这也是为什么单纯修改电脑 DNS 并不能真正翻墙的原因，因为哪怕 DNS 没被污染，随后的明文 SNI 握手依然会被 GFW 当场抓获。",
+    "relatedSlugs": [
+      "error-sni-mismatch-tls",
+      "error-tcp-rst-injection-gfw"
+    ]
+  },
+  {
+    "id": "faq-127",
+    "slug": "tcp-bbr-congestion-control-speedup",
+    "title": "Linux 拥塞控制算法 BBR 对外网翻墙测速的显著加速效果原理",
+    "category": "protocols",
+    "categoryLabel": "底层协议技术",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "Google 研发的 BBR 拥塞控制算法如何将跨国高丢包、高延迟长肥管道的下载速度提升数倍。",
+    "symptoms": [
+      "同一个节点在开启 BBR 加速后，YouTube 4K 播放跑分直接从 20,000 Kbps 飙升到 150,000+ Kbps"
+    ],
+    "rootCauses": [
+      "传统的 CUBIC 算法将「数据包丢失」作为网络拥塞的唯一信号，一旦公网出现轻微物理丢包，CUBIC 会立刻主动大幅降低发包速度；而跨国公网丢包通常只是路由抖动而非真正信道拥塞，导致传统算法永远跑不满带宽！"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "BBR 原理：基于最大带宽 (BtlBw) 和最小延迟 (RTprop) 建模",
+        "detail": "Google BBR 不再盲目将丢包视为拥塞，而是通过测量实际传输带宽与往返延迟，精准计算出管道的最大承载能力，以物理极限速率持续灌满链路！"
+      },
+      {
+        "stepTitle": "优秀机场标配：全节点内核开启 BBRv3 / BBRplus",
+        "detail": "正规专业机场的每一台中继与落地服务器，都在底层 Linux 内核中默认编译启用了 BBR 算法，这也是其在晚高峰依然能输出数百兆速率的核心秘诀之一。"
+      }
+    ],
+    "faqTips": "如果自己有海外 VPS，在终端运行一行命令开启 BBR 是提升网络速度最简单有效的方法。",
+    "relatedSlugs": [
+      "hysteria-2-udp-protocol-deep-dive",
+      "error-connection-reset-by-peer"
+    ]
+  },
+  {
+    "id": "faq-128",
+    "slug": "websocket-vs-grpc-transport-layer",
+    "title": "WebSocket、gRPC 与 HTTP/2 底层传输层性能深度对比",
+    "category": "protocols",
+    "categoryLabel": "底层协议技术",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "梳理主流代理协议常见的传输层载体优劣，在 CDN 穿透与极致性能之间找到最佳平衡。",
+    "symptoms": [
+      "配置节点时在 WS、gRPC、TCP 传输协议之间纠结不知道哪个性能更好"
+    ],
+    "rootCauses": [
+      "不同的传输协议设计初衷不同：WebSocket 兼容所有标准 Web 反向代理与 CDN；gRPC 采用 HTTP/2 多路复用和 Protobuf 二进制序列化，多并发下延迟更低"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "对比 1：纯 TCP / RAW —— 性能最高、延迟最低（专线首选）",
+        "detail": "没有任何多余的中间封装协议，数据直接通过原生 TCP Socket 发送，开销为 0。在 IPLC 专线中 100% 推荐使用纯 TCP。"
+      },
+      {
+        "stepTitle": "对比 2：gRPC —— 多并发长连接性能卓越",
+        "detail": "基于 HTTP/2 实现，单个 TCP 连接内可以并发传输几百个子流，在大规模高并发网页请求时抗丢包和性能明显优于老旧的 WebSocket。"
+      },
+      {
+        "stepTitle": "对比 3：WebSocket (WS) —— CDN 穿透兼容性最强",
+        "detail": "唯一的不可替代价值在于完美兼容 Cloudflare 等几乎所有主流 CDN 平台的免费反代与 WebSocket 升级转发，适合极端防封锁备用。"
+      }
+    ],
+    "faqTips": "追求极致测速选 TCP/RAW；追求多路复用选 gRPC；追求走免费 CDN 优选 IP 救砖选 WS。",
+    "relatedSlugs": [
+      "error-ws-bad-handshake-403",
+      "vless-reality-anti-censorship-how-it-works"
+    ]
+  },
+  {
+    "id": "faq-129",
+    "slug": "iplc-vs-iepl-technical-difference",
+    "title": "IPLC 国际专线与 IEPL 国际以太网专线的真正技术差异与成本真相",
+    "category": "protocols",
+    "categoryLabel": "底层协议技术",
+    "readTime": "6 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "揭开机场宣传中最常出现的两个核心技术名词神秘面纱，为什么专线能够真正做到「永不被墙」。",
+    "symptoms": [
+      "看到机场宣传「全节点 IPLC 物理专线」或「金融级 IEPL 内网专线」不明白具体区别"
+    ],
+    "rootCauses": [
+      "二者在底层电信运营商的实现协议层级不同：IPLC (International Private Leased Circuit) 是二层/三层物理专租线路；IEPL (International Ethernet Private Line) 是基于以太网标准的点对点专线"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "共同特质（核心价值）：完全不经过 GFW 国家防火墙！",
+        "detail": "不管是 IPLC 还是 IEPL，都是企业向中国电信/联通/移动直接租用的物理级跨境专网光纤。数据从深圳/上海的内网机房直接直通香港/日本内网机房，根本不接入公共互联网国际出口，物理上完美绕开 GFW！"
+      },
+      {
+        "stepTitle": "细微差别：IEPL 组网更灵活、抖动更低",
+        "detail": "IEPL 基于现代以太网封装，延展性更好、网络延迟抖动更加平滑（通常低于 1ms），常见于对时延要求苛刻的跨国金融证券交易；IPLC 则更老牌成熟。"
+      },
+      {
+        "stepTitle": "成本真相：高昂带宽决定了它不可能白菜价",
+        "detail": "真正的 IPLC/IEPL 带宽成本是普通公网 VPS 的数十倍，认准隐形人、大佬云这类真专线品牌，切勿轻信几块钱的假虚标专线。"
+      }
+    ],
+    "faqTips": "只要是真正的物理专线，敏感时期完全就是平时状态，完全感受不到任何封锁波动。",
+    "relatedSlugs": [
+      "bgp-multi-line-tunnel-relay-explained",
+      "why-never-buy-multi-year-package"
+    ]
+  },
+  {
+    "id": "faq-130",
+    "slug": "bgp-multi-line-tunnel-relay-explained",
+    "title": "BGP 隧道中继为什么能降低晚高峰丢包？入口与出口架构原理解密",
+    "category": "protocols",
+    "categoryLabel": "底层协议技术",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "剖析主流中高端机场普遍采用的「国内多入口 BGP 智能分流 + 境外落地机」双层架构优势。",
+    "symptoms": [
+      "好奇为什么普通直连节点一到晚高峰直接死翘翘，而经过 BGP 隧道中转的节点依然能跑 500M"
+    ],
+    "rootCauses": [
+      "国内普通宽带（尤其是移动和广电）直接访问境外服务器必须经过极其拥挤的公网国际出口关口局；而 BGP 中继架构彻底改变了数据路由拓扑"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "第一步：国内 BGP 多线秒级接入 (用户 -> 机场国内入口)",
+        "detail": "你的电信/联通/移动流量首先连接到机场部署在广州、上海或北京的国内高防机房。机房拥有 BGP 动态路由，三网直连延迟极低（通常只有 10~25ms），完全不丢包！"
+      },
+      {
+        "stepTitle": "第二步：专线/隧道极速出境 (机场国内入口 -> 境外落地机)",
+        "detail": "国内机房收到流量后，通过内部专线或优质大带宽隧道直接将数据运送到香港或日本落地机，随后在境外当地公网完成目标网站访问并原路回传。"
+      }
+    ],
+    "faqTips": "BGP 入口就像高铁专用通道，将最容易丢包的「跨境出境段」交由企业级专线代劳，体验当然天差地别。",
+    "relatedSlugs": [
+      "iplc-vs-iepl-technical-difference",
+      "anycast-routing-in-airport-nodes"
+    ]
+  },
+  {
+    "id": "faq-131",
+    "slug": "anycast-routing-in-airport-nodes",
+    "title": "Anycast 广播路由在机场智能分流中的应用与超低就近接入优势",
+    "category": "protocols",
+    "categoryLabel": "底层协议技术",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "科普大型高阶机场如何利用 Anycast 技术实现全国各地用户自动连入离自己物理距离最近的入口机房。",
+    "symptoms": [
+      "不管身在广东、北京还是四川，连接同一个订阅节点名称，测速延迟都奇迹般地保持在 20ms 以内"
+    ],
+    "rootCauses": [
+      "Anycast（任播）技术：多个分布在不同地理位置的服务器机房对外广播完全相同的同一个 IP 地址，互联网底层路由器会根据 BGP 路由表自动将用户的流量导向物理跳数最短、网络质量最佳的最近机房！"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "优势 1：全国就近接入，免除手动挑选入口的烦恼",
+        "detail": "南方用户自动进入广州机房，北方用户自动进入北京机房，华东用户自动进入上海机房，省去在节点列表中手动翻找「广移/沪联」的繁琐。"
+      },
+      {
+        "stepTitle": "优势 2：毫秒级自动故障容灾转移",
+        "detail": "当某一个入口机房因突发故障离线时，全球 BGP 路由会自动在几秒钟内将后续流量无感切换到邻近的健康机房，用户甚至感觉不到任何掉线。"
+      }
+    ],
+    "faqTips": "具备 Anycast 入口调度能力的机场（如闪跃、飞V）在架构成熟度与抗灾容灾能力上均处于行业第一梯队。",
+    "relatedSlugs": [
+      "bgp-multi-line-tunnel-relay-explained",
+      "iplc-vs-iepl-technical-difference"
+    ]
+  },
+  {
+    "id": "faq-132",
+    "slug": "full-cone-nat-type-for-gaming",
+    "title": "NAT 1 (Full Cone) 对主机联机与 P2P 下载的关键作用及测试方法",
+    "category": "protocols",
+    "categoryLabel": "底层协议技术",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "主机与 PC 玩家为什么一定要认准带有 Full Cone NAT 属性的节点才能畅快联机对战。",
+    "symptoms": [
+      "打外服使命召唤搜不到人，联机提示 NAT 严格 (Strict)",
+      "任天堂 Switch 联机报错代码 2618-0516 无法加入对局"
+    ],
+    "rootCauses": [
+      "NAT 类型从好到差分为 4 类：NAT 1 (全锥型 Full Cone)、NAT 2 (受限锥型)、NAT 3 (端口受限)、NAT 4 (对称型)。主机联机和语音通话要求客户端之间必须能够互相直接打洞穿透，如果代理节点是对称型 NAT，穿透率几乎为 0！"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：使用 NatTypeTester 工具检测当前节点 NAT 类型",
+        "detail": "在开启代理的状态下运行开源小工具 NatTypeTester。如果结果显示为「FullCone」即为完美状态；若显示「SymmetricNAT」则代表该节点不适合用于游戏联机。"
+      },
+      {
+        "stepTitle": "步骤 2：在客户端开启 UDP 转发并选择游戏专线",
+        "detail": "确保节点配置中开启了 udp: true，并选择带有「游戏专线」、「全锥形」标识的优质节点。"
+      }
+    ],
+    "faqTips": "真正的游戏专线不仅看 Ping 延迟高低，NAT 类型是否为 Full Cone 更是决定能否顺利进房间的关键基石。",
+    "relatedSlugs": [
+      "error-udp-nat-symmetric-restricted",
+      "lan-share-proxy-switch-ps5-xbox"
+    ]
+  },
+  {
+    "id": "faq-133",
+    "slug": "dns-over-https-doh-vs-dot-clash",
+    "title": "DoH (DNS over HTTPS) 与 DoT 在防劫持中的实战配置指南",
+    "category": "protocols",
+    "categoryLabel": "底层协议技术",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "掌握加密 DNS 协议技术，彻底杜绝本地运营商 HTTP 劫持、弹窗广告与 DNS 污染。",
+    "symptoms": [
+      "访问某些正常网页经常莫名其妙弹出右下角运营商推送的宽带广告",
+      "境外冷门网站被解析到了 127.0.0.1 反诈黑洞 IP"
+    ],
+    "rootCauses": [
+      "传统的 DNS 查询基于明文 UDP 53 端口传输，中间网络设备不仅可以随时窥探你在访问什么网站，还可以肆无忌惮地篡改解析返回结果"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "技术方案：升级为经过 TLS 加密的 DoH (443端口)",
+        "detail": "DNS over HTTPS 将 DNS 查询打包在标准 HTTPS 报文中，伪装成普通网页访问，外界完全无法窃听或篡改解析内容。"
+      },
+      {
+        "stepTitle": "在 Clash 配置中配置国内外分离的加密 DoH 上游",
+        "detail": "国内域名使用阿里/腾讯 DoH，海外域名使用 Cloudflare/Google DoH：",
+        "code": "dns:\n  enable: true\n  nameserver:\n    - https://dns.alidns.com/dns-query\n    - https://doh.pub/dns-query\n  fallback:\n    - https://1.1.1.1/dns-query\n    - https://8.8.8.8/dns-query"
+      }
+    ],
+    "faqTips": "在客户端开启 TUN 模式配合 DoH，整机所有软件的域名解析均处于全密态保护之下。",
+    "relatedSlugs": [
+      "dns-leak-detection-fix",
+      "clash-tun-fake-ip-vs-redir-host"
+    ]
+  },
+  {
+    "id": "faq-134",
+    "slug": "traffic-camouflage-obfs-mechanisms",
+    "title": "流量伪装 (Obfuscation) 机制：TLS、WebRTC 与视频流混淆原理解密",
+    "category": "protocols",
+    "categoryLabel": "底层协议技术",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "剖析审查系统如何利用机器学习深度包检测 (DPI) 识别代理特征，以及混淆技术如何以假乱真。",
+    "symptoms": [
+      "好奇为什么代理流量能够瞒过防火墙的逐包深度检测 (DPI) 审查"
+    ],
+    "rootCauses": [
+      "如果仅仅对数据进行加密，密文在统计学上呈现高熵 (High Entropy) 特征，审查系统很容易识别出「这是一段非正常的加密翻墙流」并进行阻断；而伪装技术将加密数据封装为标准应用层协议，使其符合正常网络规律。"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "伪装层次 1：TLS 握手伪装 (uTLS / Chrome 指纹)",
+        "detail": "模拟真实 Chrome 浏览器的 Client Hello 扩展列表、密码套件顺序，让审查模型判定其为一次正规的人类网页访问。"
+      },
+      {
+        "stepTitle": "伪装层次 2：应用载荷伪装 (HTTP/2、WebRTC 实时语音)",
+        "detail": "将数据切片混淆为 WebRTC 视频会议推流包，在流媒体大爆发时代，海量视频包特征极其庞大，审查系统不敢随意全局一刀切阻断。"
+      }
+    ],
+    "faqTips": "不断升级伪装拟真度是开源社区对抗审查长期演进的核心智慧结晶。",
+    "relatedSlugs": [
+      "error-tls-handshake-timeout",
+      "vless-reality-anti-censorship-how-it-works"
+    ]
+  },
+  {
+    "id": "faq-135",
+    "slug": "shadowsocks-2022-specification-upgrade",
+    "title": "Shadowsocks 2022 新规范带来了哪些安全加固与抗重放防御",
+    "category": "protocols",
+    "categoryLabel": "底层协议技术",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "全面解读 Shadowsocks 协议自 2022 年大重构后，如何解决长达数年的主动探测与重放攻击隐患。",
+    "symptoms": [
+      "看到某些节点类型为 ss-2022、采用 blake3-aes-128-gcm 加密方式"
+    ],
+    "rootCauses": [
+      "原版 Shadowsocks 缺乏严格的会话时序认证，GFW 可以截获用户发出的历史握手包并在几分钟后向服务端重新发送（主动探测攻击），观察服务端的响应行为从而 100% 确认该 IP 就是翻墙服务器"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "升级 1：引入严格的时间戳校验与重放过滤器 (Sliding Window)",
+        "detail": "SS-2022 在握手头部强制包含了时间戳和基于 BLAKE3 算法的单向哈希，任何重复收到或时间偏差的数据包会被直接静默丢弃，主动探测攻击彻底失效。"
+      },
+      {
+        "stepTitle": "升级 2：定长握手头部与响应伪装",
+        "detail": "消除了任何由数据包长度差异带来的指纹特征泄漏，使握手报文在物理形态上完全等同于不可预测的真随机白噪声。"
+      }
+    ],
+    "faqTips": "SS-2022 是经典 Shadowsocks 协议在新时代重获新生的重大升级，兼具顶级性能与现代密码学安全。",
+    "relatedSlugs": [
+      "shadowsocks-vs-trojan-vs-vless",
+      "error-cipher-not-supported"
+    ]
+  },
+  {
+    "id": "faq-136",
+    "slug": "windows-11-system-proxy-auto-tampered",
+    "title": "Windows 11 系统代理开关被其他软件反复篡改锁定彻底解决",
+    "category": "hardware",
+    "categoryLabel": "多端设备与系统专病",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "排查电脑中恶意加速器、网盘客户端或流氓插件在后台强制劫持 Windows 代理注册表的根除方案。",
+    "symptoms": [
+      "明明关闭了 Clash，几秒钟后代理开关又莫名其妙自己打开，指向一个奇怪的本地端口（如 127.0.0.1:10809 或 8080）",
+      "国内微信百度瞬间断网，必须手动去设置里不断关闭代理",
+      "修改注册表后重启电脑又被恢复"
+    ],
+    "rootCauses": [
+      "某些第三方游戏加速器、老旧安卓模拟器、极速下载器在后台运行了静默守护进程，硬编码循环检测并强行覆盖注册表 ProxyEnable 键值"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：排查可疑的后台自启动常驻服务",
+        "detail": "打开任务管理器 ->「启动」选项卡，禁用所有不认识的开机自启程序；按 Win + R 运行 services.msc，检查是否有残留的第三方代理服务。"
+      },
+      {
+        "stepTitle": "步骤 2：对 Windows 代理注册表键值设置「拒绝写入」权限（强效绝杀）",
+        "detail": "按 Win + R 运行 regedit，定位到：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings，右键该项选择「权限」->「高级」-> 限制受限用户的「设置数值」权限，防止任何流氓软件再次擅自篡改。"
+      },
+      {
+        "stepTitle": "步骤 3：在日常中开启 Clash 的 TUN 模式",
+        "detail": "TUN 模式完全绕过 Windows 的传统注册表代理体系，彻底免疫此类系统级代理篡改。"
+      }
+    ],
+    "faqTips": "如果刚卸载过某些游戏加速器，建议重启前执行一次 netsh winsock reset 重置网络套接字。",
+    "relatedSlugs": [
+      "clash-verge-system-proxy-reset",
+      "clash-tun-mode-virtual-nic-fail"
+    ]
+  },
+  {
+    "id": "faq-137",
+    "slug": "macos-network-extension-authorization-blocked",
+    "title": "macOS 提示「系统扩展已被阻止」无法接管流量修复指南",
+    "category": "hardware",
+    "categoryLabel": "多端设备与系统专病",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "苹果 Mac 用户在初次安装 Clash Verge Rev 或 Surge 开启增强模式时，macOS 弹窗拦截驱动授权的解决。",
+    "symptoms": [
+      "开启增强模式或 TUN 时弹窗提示：系统扩展已被阻止 (System Extension Blocked)",
+      "无法在网络偏好设置中看到虚拟网卡",
+      "状态栏客户端图标闪烁报错"
+    ],
+    "rootCauses": [
+      "macOS (Sonoma / Sequoia) 具备极其严格的 SIP 系统完整性保护机制，任何内核级或网络扩展 (Network Extension) 必须由用户亲自在系统设置中手动解锁授权"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：前往系统设置的「隐私与安全性」中手动点击允许",
+        "detail": "打开 Mac「系统设置」->「隐私与安全性」-> 向下滑动到「安全性」区域，会看到一行黄底文字：「来自开发者 xxx 的系统软件已被阻止载入」，点击右侧的「允许」按钮并输入 Mac 开机密码确认授权。"
+      },
+      {
+        "stepTitle": "步骤 2：在网络面板中信任新添加的 VPN 配置",
+        "detail": "系统弹出提示「xxx 想要添加 VPN 配置」，果断点击「允许」，完成驱动加载注册。"
+      }
+    ],
+    "faqTips": "这是苹果系统的标准安全防护流程，每个 Mac 用户初次配置网络扩展工具时都需要进行一次授权。",
+    "relatedSlugs": [
+      "clash-tun-mode-virtual-nic-fail",
+      "linux-desktop-system-wide-proxy-clash"
+    ]
+  },
+  {
+    "id": "faq-138",
+    "slug": "ios-vpn-auto-disconnect-standby",
+    "title": "iPhone 锁屏待机后代理经常自动断开重连的省电冲突解决",
+    "category": "hardware",
+    "categoryLabel": "多端设备与系统专病",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "苹果 iPhone 用户锁屏息屏十几分钟后，小火箭或 Loon 自动断开、推送消息收不到的解决全解。",
+    "symptoms": [
+      "点亮屏幕发现状态栏小 VPN 标志才刚刚重新弹出来，显示正在重新连接",
+      "锁屏期间 Telegram 或海外邮件没有任何消息推送通知",
+      "频繁在 Wi-Fi 和蜂窝移动网络切换时断连"
+    ],
+    "rootCauses": [
+      "iOS 系统的「低电量模式」或休眠策略会在锁屏后强行切断后台常驻的网络扩展以节省电量",
+      "Wi-Fi 在休眠时自动关闭了与路由器的信令保活"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：关闭 iOS「低电量模式」并允许后台刷新",
+        "detail": "进入 iPhone「设置」->「电池」-> 确保关闭「低电量模式」；进入「通用」->「后台 App 刷新」，确保小火箭处于允许刷新状态。"
+      },
+      {
+        "stepTitle": "步骤 2：在小火箭设置中开启「随网络切换自动重连」",
+        "detail": "进入 Shadowrocket「设置」-> 开启「自动连接」与「随网络切换重新连接」，确保从 Wi-Fi 走到户外切为 5G 时无感续接。"
+      }
+    ],
+    "faqTips": "小火箭基于 iOS 原生 NetworkExtension 框架开发，内存占用通常低于 15MB，常驻后台耗电微乎其微，无需刻意关闭。",
+    "relatedSlugs": [
+      "v2rayng-battery-optimization-kill",
+      "shadowrocket-subscription-timeout"
+    ]
+  },
+  {
+    "id": "faq-139",
+    "slug": "android-private-dns-conflict-proxy",
+    "title": "Android 手机系统「私人 DNS」与科学上网软件冲突排错指南",
+    "category": "hardware",
+    "categoryLabel": "多端设备与系统专病",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "安卓手机（小米/三星/一加）开启了系统自带的 Private DNS 后，导致所有代理软件完全打不开网页的解决。",
+    "symptoms": [
+      "开启 v2rayNG 或 Clash 后手机状态栏提示「无法连接到互联网」",
+      "打开任何网页提示 DNS_PROBE_FINISHED_BAD_CONFIG",
+      "必须在手机系统设置里把私人 DNS 关掉才能上网"
+    ],
+    "rootCauses": [
+      "Android 原生的「私人 DNS (Private DNS)」采用 DoT 协议强制向固定主机名发起 TLS 握手，而代理客户端的 VPN 虚拟网卡在尝试劫持 853 端口时产生死锁冲突"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在手机设置中将私人 DNS 设为「关闭」或「自动」",
+        "detail": "打开安卓手机「设置」->「连接与共享」->「私人 DNS」-> 勾选「关闭」即可。域名防污染和加密解析完全交由客户端内置的 Clash DNS 代劳，性能更好。"
+      },
+      {
+        "stepTitle": "步骤 2：在客户端内开启 Fake-IP 模式",
+        "detail": "Fake-IP 模式会直接接管所有 DNS 解析流程，彻底解决系统底层 DoT 与代理冲突问题。"
+      }
+    ],
+    "faqTips": "很多安卓用户折腾半天连不上，最后发现就是因为系统里偷偷开了一个不可用的私人 DNS 导致的，关闭后秒通。",
+    "relatedSlugs": [
+      "dns-leak-detection-fix",
+      "clash-tun-fake-ip-vs-redir-host"
+    ]
+  },
+  {
+    "id": "faq-140",
+    "slug": "apple-tv-tvos-surge-clash-proxy",
+    "title": "Apple TV (tvOS 17+) 安装 Quantumult X / Surge 终极看片方案",
+    "category": "hardware",
+    "categoryLabel": "多端设备与系统专病",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "苹果电视盒子自 tvOS 17 开放原生 VPN 接口后，在电视上直接安装圈 X、Surge 或 Loon 看 4K 原盘大片的终极方案。",
+    "symptoms": [
+      "以往在 Apple TV 上看 Netflix / YouTube 必须折腾软路由或复杂网关",
+      "不知道如何在 tvOS 系统的 App Store 下载代理软件"
+    ],
+    "rootCauses": [
+      "tvOS 17 之前系统原生不支持 VPN 协议栈，tvOS 17 之后苹果官方全面开放，主流工具均已推出原生 TV 版客户端"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在 Apple TV 的 App Store 登录美区 Apple ID",
+        "detail": "进入电视设置 ->「用户与账户」-> 添加并切换为你已购买过圈 X、Surge 或 Loon 的美区 Apple ID。"
+      },
+      {
+        "stepTitle": "步骤 2：在 TV 版 App Store 直接搜索下载客户端",
+        "detail": "下载并安装 Quantumult X (TV 版) 或 Surge (tvOS 版)，打开后手机扫描电视屏幕上的二维码即可一键同步手机上的机场订阅！"
+      },
+      {
+        "stepTitle": "步骤 3：在设置中开启「随 Apple TV 开机自动连接」",
+        "detail": "开启后，电视每次开机自动后台静默代理，直接使用遥控器点开 YouTube 4K、Netflix 丝滑秒播！"
+      }
+    ],
+    "faqTips": "tvOS 原生客户端的出现彻底终结了为了电视买软路由的时代，稳定性大幅跃升。",
+    "relatedSlugs": [
+      "surge-enhanced-mode-router-gateway",
+      "netflix-only-originals-fix"
+    ]
+  },
+  {
+    "id": "faq-141",
+    "slug": "android-tv-box-clash-remote-control",
+    "title": "索尼电视 / 小米盒子安装 Clash 遥控器无法操作与旁路由选型",
+    "category": "hardware",
+    "categoryLabel": "多端设备与系统专病",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "在安卓智能电视、外贸电视盒子上使用标准手机版 APK 导致遥控器无法点击按钮的应对。",
+    "symptoms": [
+      "把手机版 Clash 安装包通过 U 盘装到电视上后，遥控器光标无法移动到开关按钮上",
+      "界面横竖屏错乱，画面被拉伸变形"
+    ],
+    "rootCauses": [
+      "手机版 APK 是为触屏交互设计的，缺乏 Android TV 专有的遥控器焦点 (Focus) 交互规范"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：必须下载专门针对电视 TV 适配的专用版客户端",
+        "detail": "认准专为电视大屏开发的开源客户端（如 Clash for Android TV 版、Karing TV 版或 v2rayNG TV 版），界面完美支持方向键与确定键。"
+      },
+      {
+        "stepTitle": "步骤 2：应急方案：使用蓝牙鼠标或手机遥控器触控板",
+        "detail": "给电视插入一个普通的无线鼠标，或者在手机上安装遥控器 App 开启鼠标指针模式进行一次性配置。"
+      }
+    ],
+    "faqTips": "电视端一旦配置好订阅并开启开机自启，之后只需日常使用即可，极少需要频繁修改设置。",
+    "relatedSlugs": [
+      "apple-tv-tvos-surge-clash-proxy",
+      "lan-share-proxy-switch-ps5-xbox"
+    ]
+  },
+  {
+    "id": "faq-142",
+    "slug": "harmonyos-next-proxy-compatibility",
+    "title": "华为鸿蒙系统 (HarmonyOS) 代理软件安装与纯血鸿蒙前瞻",
+    "category": "hardware",
+    "categoryLabel": "多端设备与系统专病",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "华为手机用户在 HarmonyOS 4.x 及纯血鸿蒙 HarmonyOS NEXT 下配置科学上网的现状与指引。",
+    "symptoms": [
+      "华为手机安装第三方 APK 提示高风险应用并强制拦截",
+      "关心未来升级纯血鸿蒙后还能否继续使用科学上网工具"
+    ],
+    "rootCauses": [
+      "华为纯血鸿蒙 NEXT 彻底剥离了 Linux 内核与安卓 AOSP 代码，无法直接运行传统的 Android .apk 安装包"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "针对 HarmonyOS 4.x / 现有鸿蒙系统：关闭纯净模式安装",
+        "detail": "进入「设置」->「系统和更新」-> 关闭「纯净模式」，或者在安装提示风险时点击「继续安装」输入指纹即可正常使用 v2rayNG 或 Clash。"
+      },
+      {
+        "stepTitle": "针对纯血鸿蒙 NEXT：通过路由器或局域网代理托管",
+        "detail": "未来升级纯血鸿蒙且未有原生客户端适配前，建议通过电脑端开启「允许局域网连接」或家庭软路由让华为手机免客户端享受加速。"
+      }
+    ],
+    "faqTips": "现有搭载 HarmonyOS 4 的华为设备完全具备 Android 兼容层，正常使用主流客户端毫无障碍。",
+    "relatedSlugs": [
+      "v2rayng-battery-optimization-kill",
+      "lan-share-proxy-switch-ps5-xbox"
+    ]
+  },
+  {
+    "id": "faq-143",
+    "slug": "linux-desktop-system-wide-proxy-clash",
+    "title": "Ubuntu / Debian Linux 桌面环境下系统全局代理最佳配置",
+    "category": "hardware",
+    "categoryLabel": "多端设备与系统专病",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "Linux 极客与开发者在 GNOME / KDE 桌面环境中实现系统设置、终端命令与 GUI 应用统一代理。",
+    "symptoms": [
+      "在 Linux 下运行了 Clash 核心，Firefox 浏览器可以翻墙但 Chrome 或终端依然无法联网"
+    ],
+    "rootCauses": [
+      "Linux 各个工具生态割裂：GNOME 桌面代理只影响部分 GUI 软件，终端工具只认环境变量，内核流量需要 iptables/nftables 接管"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：直接使用 Clash Verge Rev 的 Linux 官方包并开启 TUN",
+        "detail": "从 GitHub 下载 clash-verge_x.x.x_amd64.deb 安装，使用 sudo 启动并开启 TUN 模式，Mihomo 会自动通过 nftables 接管整机全流量！"
+      },
+      {
+        "stepTitle": "步骤 2：在 /etc/environment 中注入全局代理环境变量",
+        "detail": "在配置文件末尾写入代理地址，保证所有终端命令行程序开箱即用：",
+        "code": "http_proxy=\"http://127.0.0.1:7890/\"\nhttps_proxy=\"http://127.0.0.1:7890/\"\nno_proxy=\"localhost,127.0.0.1,localaddress,.localdomain.com\""
+      }
+    ],
+    "faqTips": "TUN 模式是目前解决 Linux 多应用网络割裂的最完美现代方案，强烈推荐开启。",
+    "relatedSlugs": [
+      "clash-tun-mode-virtual-nic-fail",
+      "curl-wget-terminal-proxy-environment"
+    ]
+  },
+  {
+    "id": "faq-144",
+    "slug": "synology-nas-docker-proxy-download",
+    "title": "群晖 Synology NAS Docker 与套件中心联网慢走代理配置",
+    "category": "hardware",
+    "categoryLabel": "多端设备与系统专病",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "解决群晖 NAS 套件中心刷新不出来、Container Manager (Docker) 无法下载海外容器镜像的问题。",
+    "symptoms": [
+      "群晖套件中心提示「联机失败，请检查网络设置」",
+      "拉取海外 Docker 镜像卡死在 Downloading",
+      "Cloud Sync 无法同步 Google Drive 或 OneDrive"
+    ],
+    "rootCauses": [
+      "群晖 DSM 系统默认未配置系统级网络代理"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在群晖控制面板中直接配置局域网代理",
+        "detail": "打开 DSM「控制面板」->「网络」->「常规」选项卡 -> 勾选「通过代理服务器连接」-> 填入局域网内开着代理的电脑 IP（如 192.168.1.100）和端口 7890，点击应用。"
+      },
+      {
+        "stepTitle": "步骤 2：套件中心与系统更新即刻恢复秒开",
+        "detail": "配置完成后，套件中心和 Container Manager 会自动通过局域网代理高速下载所需套件与镜像。"
+      }
+    ],
+    "faqTips": "大文件下载完成后，可随时在控制面板中取消勾选代理，恢复纯内网直连状态。",
+    "relatedSlugs": [
+      "docker-daemon-pull-images-proxy",
+      "lan-share-proxy-switch-ps5-xbox"
+    ]
+  },
+  {
+    "id": "faq-145",
+    "slug": "steam-deck-gaming-mode-proxy-clash",
+    "title": "Steam Deck 掌机在 Gaming 游戏模式下后台常驻运行 Clash 加速",
+    "category": "hardware",
+    "categoryLabel": "多端设备与系统专病",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "手把手教你在 Steam Deck 掌机原生系统 (SteamOS) 部署全自动翻墙，加速 Steam 商店与游戏更新。",
+    "symptoms": [
+      "Steam Deck 掌机进入商店一直转圈报错无法进入",
+      "外服 Apex 或怪物猎人联机延迟极高容易掉线",
+      "切换到桌面模式配置好代理，一回到游戏模式又失效"
+    ],
+    "rootCauses": [
+      "SteamOS 基于 Arch Linux 构建，只读根文件系统保护导致常规安装重启后被抹除"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在桌面模式使用 Flatpak 安装 Clash Verge",
+        "detail": "切换到桌面模式 (Desktop Mode)，在 Discover 软件中心搜索并安装 Clash Verge Rev Flatpak 封装版。"
+      },
+      {
+        "stepTitle": "步骤 2：开启服务模式并设置开机自启 systemd 守护服务",
+        "detail": "导入机场订阅并开启 TUN 模式，TUN 模式会作为虚拟网卡直接驻留在操作系统网络栈底层，即使切换回掌机游戏模式依然完美常驻生效！"
+      }
+    ],
+    "faqTips": "Steam Deck 配备香港专线后，在被窝里随时逛商店、秒连好友房间开黑体验极佳。",
+    "relatedSlugs": [
+      "lan-share-proxy-switch-ps5-xbox",
+      "steam-community-error-101-118"
+    ]
+  },
+  {
+    "id": "faq-146",
+    "slug": "kindle-kobo-ereader-proxy-sync",
+    "title": "Kindle 与 Kobo 电子书阅读器走代理同步海外书库设置指南",
+    "category": "hardware",
+    "categoryLabel": "多端设备与系统专病",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "水墨屏阅读器同步亚马逊美区 Kindle 商店或乐天 Kobo 书库的网络打通指南。",
+    "symptoms": [
+      "Kindle 登录美区 Amazon 账号时提示无法连接到服务器",
+      "Kobo 电子书商店一直在同步中无法下载已购图书"
+    ],
+    "rootCauses": [
+      "电子书水墨屏系统功能精简，缺乏直接安装 VPN 应用的能力"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：利用电脑开启局域网代理共享",
+        "detail": "在电脑 Clash 中开启「允许局域网连接」，在 Kindle 连上同一个 Wi-Fi 后，长按该 Wi-Fi 选择「修改网络」-> 开启代理并填入电脑 IP 与 7890 端口。"
+      },
+      {
+        "stepTitle": "步骤 2：同步完成后关闭代理节省电量",
+        "detail": "电子书同步完毕后将 Wi-Fi 代理关闭，避免长时间开启增加墨水屏设备的待机功耗。"
+      }
+    ],
+    "faqTips": "或者直接利用手机热点翻墙分享给阅读器，便携且免去配置路由器的麻烦。",
+    "relatedSlugs": [
+      "lan-share-proxy-switch-ps5-xbox",
+      "smart-home-iot-bypass-proxy"
+    ]
+  },
+  {
+    "id": "faq-147",
+    "slug": "vr-meta-quest-3-sidequest-proxy",
+    "title": "Meta Quest 3 / Pico 4 VR 一体机科学上网与游戏联机方案",
+    "category": "hardware",
+    "categoryLabel": "多端设备与系统专病",
+    "readTime": "5 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "VR 玩家初次激活 Meta Quest 3、下载 Beat Saber 联机歌单的保姆级穿透指南。",
+    "symptoms": [
+      "Quest 3 首次开机佩戴提示无网络连接无法完成初始系统更新与配对",
+      "Meta Quest Store 商店无法加载应用列表"
+    ],
+    "rootCauses": [
+      "Quest 3 系统基于 Android 开源底层构建，初次开机强依赖 Oculus/Meta 服务器激活"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "方案 A：使用电脑开热点配合 TUN 模式（开机激活最推荐）",
+        "detail": "在笔记本电脑上开启 Clash Verge TUN 模式，然后开启 Windows 移动热点；Quest 3 连接该热点即可实现全局透明翻墙，轻松完成初始固件更新激活！"
+      },
+      {
+        "stepTitle": "方案 B：激活后通过 SideQuest 侧载安装安卓版 Clash APK",
+        "detail": "激活进入系统后，通过 SideQuest 将 APK 安装进头显，在「未知来源」中即可直接用手柄点击运行开启代理。"
+      }
+    ],
+    "faqTips": "VR 游戏对延迟极其敏感，玩外服联机时强烈建议搭配香港或日本 IPLC 专线以防眩晕和卡顿。",
+    "relatedSlugs": [
+      "lan-share-proxy-switch-ps5-xbox",
+      "error-udp-nat-symmetric-restricted"
+    ]
+  },
+  {
+    "id": "faq-148",
+    "slug": "smart-home-iot-bypass-proxy",
+    "title": "避免小米 / 米家 / 涂鸦智能家居设备误走代理导致离线的规则",
+    "category": "hardware",
+    "categoryLabel": "多端设备与系统专病",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "在全屋软路由部署透明代理时，防止扫地机器人、智能门锁、摄像头莫名其妙频繁掉线离线。",
+    "symptoms": [
+      "软路由开启代理后，米家 App 里多款智能灯具显示离线",
+      "小爱同学经常提示「网络连接出现问题」"
+    ],
+    "rootCauses": [
+      "智能家居硬件使用的私有长连接心跳通道被代理核心强制接管拦截，导致与国内云端心跳超时"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在路由器中通过 MAC / IP 地址设立「智能设备直连绕过名单」",
+        "detail": "在 OpenClash 或旁路由访问控制中，将全家所有智能家居设备的局域网 IP（或通过固定 DHCP 分配）加入「不走核心直连白名单」。"
+      },
+      {
+        "stepTitle": "步骤 2：添加米家与涂鸦全系云平台直连域名规则",
+        "detail": "在 rules 中加入 DOMAIN-SUFFIX,mi.com,DIRECT 和 DOMAIN-SUFFIX,tuya.com,DIRECT。"
+      }
+    ],
+    "faqTips": "智能家居全部排除在代理之外是保证家庭智能网络稳固不折腾的基本底线。",
+    "relatedSlugs": [
+      "openwrt-openclash-double-routing-crash",
+      "bypass-private-lan-ip-clash"
+    ]
+  },
+  {
+    "id": "faq-149",
+    "slug": "ipad-split-view-proxy-rules",
+    "title": "iPadOS 分屏多任务办公场景下 Safari 与文献查阅的分流规则优化",
+    "category": "hardware",
+    "categoryLabel": "多端设备与系统专病",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "iPad 生产力玩家边开微信写笔记、边在 Safari 查阅海外文献时的无缝分流调优。",
+    "symptoms": [
+      "在 iPad 上分屏使用微信和海外学术网站，微信收发文件变得极慢"
+    ],
+    "rootCauses": [
+      "iPad 端的 Shadowrocket 或 Loon 分流规则未细化，国内通讯与海外科研流量混杂"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：在小火箭中使用精细化的规则配置分组",
+        "detail": "规则模式选用「配置」，并确保国内应用 (CN) 指向 DIRECT 直连，海外学术域名指向高速学术专线。"
+      },
+      {
+        "stepTitle": "步骤 2：在控制中心添加一键切换快捷小组件",
+        "detail": "利用 iOS 快捷指令添加小火箭开关组件，在不需要查资料时轻触即可关闭代理省电。"
+      }
+    ],
+    "faqTips": "iPad 搭配规则分流，完全可以实现微信秒发、海外 Google 文献秒开的无缝混合办公体验。",
+    "relatedSlugs": [
+      "domestic-speed-slow-when-proxy-on",
+      "shadowrocket-node-group-auto-test"
+    ]
+  },
+  {
+    "id": "faq-150",
+    "slug": "carplay-in-car-screen-proxy-network",
+    "title": "CarPlay 与 Android 车机系统安装代理软件导航与流媒体播放指南",
+    "category": "hardware",
+    "categoryLabel": "多端设备与系统专病",
+    "readTime": "4 分钟",
+    "updatedAt": "2025年最新实测",
+    "summary": "在特斯拉、造车新势力或通用 Android 大屏车机上播放海外 Spotify、YouTube 音乐的技巧。",
+    "symptoms": [
+      "车机连上手机热点后，车机自带的高德/百度地图导航提示网络受阻",
+      "在车机端使用第三方浏览器无法播放海外音乐"
+    ],
+    "rootCauses": [
+      "车载车机默认流量卡走的是受限的车联网专网通道，无法直接建立境外代理隧道"
+    ],
+    "solutions": [
+      {
+        "stepTitle": "步骤 1：利用手机无线 CarPlay / 热点作为代理跳板",
+        "detail": "iPhone 开启代理后连接无线 CarPlay，车机端屏幕映射的 Spotify 会直接继承手机端的科学上网链路，车载地图导航则依然走国内直连，互不冲突！"
+      },
+      {
+        "stepTitle": "步骤 2：开放式 Android 车机（如比亚迪、吉利等）可直接侧载 APK",
+        "detail": "在开放车机上通过应用市场安装 v2rayNG，设置「分应用代理」仅勾选媒体播放软件，确保不影响车辆本身的远程车控与 OTA 升级。"
+      }
+    ],
+    "faqTips": "车机系统关乎驾驶安全，严禁对核心行车仪表及辅助驾驶网络做任何全局代理接管，仅限制在娱乐 App 即可。",
+    "relatedSlugs": [
+      "spotify-change-country-gray-songs",
+      "v2rayng-battery-optimization-kill"
+    ]
+  }
+]

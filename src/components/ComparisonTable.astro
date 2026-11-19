@@ -1,0 +1,104 @@
+---
+import { AIRPORTS_DATA } from '../data/airports';
+---
+
+<div class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/60 shadow-xl">
+  <table class="w-full text-left border-collapse text-xs sm:text-sm">
+    <thead>
+      <tr class="border-b border-slate-800 bg-slate-950/80 text-slate-400 font-semibold">
+        <th class="py-4 px-4 sm:px-6">机场名称 / 定位</th>
+        <th class="py-4 px-4">线路类型</th>
+        <th class="py-4 px-4">晚高峰测速</th>
+        <th class="py-4 px-4">流媒体 / AI 解锁</th>
+        <th class="py-4 px-4">起步价格</th>
+        <th class="py-4 px-4">协议支持</th>
+        <th class="py-4 px-4 text-center">直达选购</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-800/60">
+      {AIRPORTS_DATA.map((item) => (
+        <tr class="hover:bg-slate-800/40 transition-colors">
+          <!-- Name & Category -->
+          <td class="py-4 px-4 sm:px-6">
+            <div class="flex items-center gap-3">
+              <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-cyan-950 text-cyan-400 font-bold text-xs shrink-0">
+                #{item.rank}
+              </span>
+              {item.logo ? (
+                <img
+                  src={item.logo}
+                  alt={`${item.name} Logo`}
+                  class="w-8 h-8 rounded-lg bg-white p-0.5 object-contain shrink-0 border border-slate-700 shadow-sm"
+                />
+              ) : null}
+              <div>
+                <a href={`/reviews/${item.reviewSlug || item.slug}`} class="font-bold text-white hover:text-cyan-400 transition-colors block">
+                  {item.name}
+                </a>
+                <span class="text-[11px] text-slate-400">
+                  {item.categoryLabel}
+                </span>
+              </div>
+            </div>
+          </td>
+
+          <!-- Line Type -->
+          <td class="py-4 px-4 text-slate-300">
+            <span class="font-medium text-cyan-300">{item.lineType}</span>
+            <span class="block text-[11px] text-slate-500">{item.bgp}</span>
+          </td>
+
+          <!-- Speed -->
+          <td class="py-4 px-4">
+            <span class="px-2 py-1 rounded bg-emerald-950/60 border border-emerald-800/60 text-emerald-300 font-semibold text-xs inline-block">
+              ⚡ {item.speedPeak}
+            </span>
+          </td>
+
+          <!-- Streaming / AI -->
+          <td class="py-4 px-4">
+            <div class="flex flex-wrap gap-1 max-w-[200px]">
+              {item.streamingUnlock.slice(0, 3).map((tag) => (
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </td>
+
+          <!-- Price -->
+          <td class="py-4 px-4">
+            <span class="text-base font-extrabold text-cyan-400">¥{item.priceStart}</span>
+            <span class="text-xs text-slate-400">/{item.billingCycle}</span>
+          </td>
+
+          <!-- Protocols -->
+          <td class="py-4 px-4 text-slate-400 text-xs">
+            {item.protocols.join(' / ')}
+          </td>
+
+          <!-- Action -->
+          <td class="py-4 px-4 text-center">
+            <div class="flex flex-col gap-1 items-center">
+              <a
+                href={item.affUrl}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-colors inline-flex items-center gap-1 shadow-sm"
+              >
+                <span>进入官网</span>
+                <span>↗</span>
+              </a>
+              <a
+                href={`/reviews/${item.reviewSlug || item.slug}`}
+                class="text-[11px] text-slate-400 hover:text-cyan-400 underline"
+              >
+                查看测评
+              </a>
+            </div>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,86 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { SITE_METADATA } from '../../data/navigation';
+---
+
+<BaseLayout
+  title="关于我们 - 测速标准与免责声明 | 机场选择"
+  description="了解「机场选择」(jichangxuanze.lat) 的评测准则、测速环境与评级标准。客观、公正、拒绝虚标。"
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="mb-10 pb-6 border-b border-slate-800">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-800/60 text-xs text-cyan-300 font-medium mb-3">
+        <span>📖 关于本站</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+        关于「机场选择」与我们的实测准则
+      </h1>
+      <p class="text-slate-400 text-sm sm:text-base mt-3 leading-relaxed">
+        域名：<span class="text-cyan-400 font-mono">{SITE_METADATA.domain}</span> | 致力于做中文互联网最客观、专业的科学上网节点评测与推荐指南。
+      </p>
+    </div>
+
+    <div class="space-y-10 text-slate-300 text-sm leading-relaxed">
+      
+      <!-- Section 1 -->
+      <section class="space-y-3">
+        <h2 class="text-xl font-bold text-white">一、我们的初衷</h2>
+        <p>
+          在当今网络环境下，科学上网工具对于广大学术研究人员查阅 Google Scholar、跨境外贸从业者与海外客户沟通、海外自媒体运营以及普通用户娱乐（YouTube / Netflix / Spotify）已成为必不可少的工具。
+        </p>
+        <p>
+          然而，网络代理市场鱼龙混杂：<strong>低价噱头跑路、虚标 IPLC 专线、晚高峰断流卡顿、流媒体大面积风控封锁</strong> 等现象屡见不鲜。「机场选择」团队自费采购主流机场套餐，通过长期连续监控，为用户提供真实、透明的选购参考。
+        </p>
+      </section>
+
+      <!-- Section 2 -->
+      <section class="space-y-3 p-6 rounded-2xl bg-slate-900/60 border border-slate-800">
+        <h2 class="text-xl font-bold text-white">二、严格的测速测试环境标准</h2>
+        <p class="text-xs text-slate-400">
+          为了确保数据的客观性，所有测试均在以下标准环境下进行：
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 text-xs">
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/60">
+            <strong class="text-cyan-300 block mb-1">测试宽带环境</strong>
+            中国电信 1000M / 中国联通 1000M / 中国移动 500M 三网多地物理光纤接入。
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/60">
+            <strong class="text-cyan-300 block mb-1">测试时段</strong>
+            严格在每晚 <strong>20:00 ~ 23:00 全网晚高峰黄金拥堵期</strong> 进行采样，而非闲时刷漂亮数据。
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/60">
+            <strong class="text-cyan-300 block mb-1">流媒体与 AI 检测</strong>
+            使用自动化脚本实时检测 Netflix 4K 原生自制剧、Disney+、OpenAI (ChatGPT 4o) 及 Claude 3.5 的访问阻断情况。
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/60">
+            <strong class="text-cyan-300 block mb-1">监控周期</strong>
+            所有上榜机场至少稳定运行并在本站监控池中观察 <strong>90 天以上</strong>，排除新开野鸡站。
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3 -->
+      <section class="space-y-3">
+        <h2 class="text-xl font-bold text-white">三、商业模式与 Affiliate 说明</h2>
+        <p>
+          本站部分链接为 Affiliate 合作链接。当您通过本站链接前往相关服务商并产生订阅消费时，本站可能会获得少许推广佣金。
+        </p>
+        <p class="text-slate-400">
+          <strong>这不会增加您的任何购买成本</strong>（通过本站优惠码通常还能获得额外折扣）。佣金收入将全额用于支付本站测试宽带费用、服务器托管费用以及购买各机场测试套餐。我们绝不会因商业合作而将劣质、高风险的机场列入推荐榜单。
+        </p>
+      </section>
+
+      <!-- Section 4 -->
+      <section class="space-y-3 p-6 rounded-2xl bg-rose-950/20 border border-rose-900/40">
+        <h2 class="text-xl font-bold text-rose-300">四、免责与法律声明</h2>
+        <p class="text-xs text-rose-200/80 leading-relaxed">
+          1. 本站仅为技术评测、网络性能测试数据分享及软件使用交流平台，<strong>本站不提供任何翻墙软件、节点分发及翻墙销售服务</strong>。<br />
+          2. 请严格遵守您所在国家和地区的相关法律法规。使用网络代理工具仅可用于正当的学术交流、科研查阅及外贸工作，严禁用于任何危害网络安全及违反法律法规的行为。<br />
+          3. 第三方服务商的产品质量、退款政策及运营情况由其独立负责，购买前请务必仔细阅读其官方服务条款 (ToS)。
+        </p>
+      </section>
+
+    </div>
+  </div>
+</BaseLayout>
