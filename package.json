@@ -17,10 +17,11 @@
     "Clash教程"
   ],
   "author": "机场选择",
-  "license": "MIT",
+  "license": "ISC",
   "dependencies": {
     "@astrojs/tailwind": "^6.0.2",
-    "astro": "^5.18.2",
-    "tailwindcss": "^3.4.17"
+    "astro": "^7.4.13",
+    "lucide-astro": "^0.556.0",
+    "tailwindcss": "^3.4.19"
   }
 }
